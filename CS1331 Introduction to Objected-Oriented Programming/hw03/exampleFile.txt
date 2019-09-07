@@ -1,0 +1,4 @@
+allcaps Hello
+power 2 3
+substring cs1331rocks 6 11
+substring hi 0 3
