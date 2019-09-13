@@ -7,17 +7,17 @@
 public class WaterFountain {
     private String modelName;
     private boolean requiresMaintenance;
-    private int CupsPoured = 1;
-    public static int totalWaterFountains = 0;
+    private int cupsPoured = 1;
+    private static int totalWaterFountains = 0;
     public static final String SOFTWARE_VERSION = "2.0.0";
     /**
     * This is a constructor.
     * @param modelName a string which is the fountain's name.
-    * @param CupsPoured a intger which is the number of cups of water.
+    * @param cupsPoured a intger which is the number of cups of water.
     */
-    public WaterFountain(String modelName, int CupsPoured) {
+    public WaterFountain(String modelName, int cupsPoured) {
         this.modelName = modelName;
-        this.CupsPoured = CupsPoured;
+        this.cupsPoured = cupsPoured;
         requiresMaintenance = false;
         totalWaterFountains++;
     }
@@ -54,14 +54,14 @@ public class WaterFountain {
     * @return the integer that represents the number of cups of water.
     */
     public int getCupsPoured() {
-        return CupsPoured;
+        return cupsPoured;
     }
     /**
     * This is a setter that returns the number of cups of water.
     * @return the integer that shows the number of cups of water.
     */
     public int setCupsPoured() {
-        return CupsPoured;
+        return cupsPoured;
     }
      /**
     * This is a getter that returns the number of water fountains that have been created.
@@ -72,11 +72,10 @@ public class WaterFountain {
     }
     /**
     * This is a method that if foundains need to be fixed, the number of cups of water increases.
-    * @return void 
     */
     public void pourCup() {
-        if (requiresMaintenance != true) {
-            CupsPoured++;
+        if (!this.requiresMaintenance) {
+            cupsPoured++;
         }
     }
     /**
@@ -86,7 +85,7 @@ public class WaterFountain {
     */
     public boolean equals(WaterFountain other) {
         return (this.modelName == other.modelName
-            && this.CupsPoured == other.CupsPoured
+            && this.cupsPoured == other.cupsPoured
             && this.SOFTWARE_VERSION == other.SOFTWARE_VERSION);
     }
     /**
@@ -95,14 +94,14 @@ public class WaterFountain {
     */
     public String toString() {
         if (requiresMaintenance) {
-            String cups = String.valueOf(CupsPoured);
+            String cups = String.valueOf(cupsPoured);
             return (modelName
                 + " has poured "
                 + cups
                 + " cups, requires maintenance, and is running version: "
                 + SOFTWARE_VERSION);
         } else {
-            String cups = String.valueOf(CupsPoured);
+            String cups = String.valueOf(cupsPoured);
             return (modelName
                 + " has poured "
                 + cups
