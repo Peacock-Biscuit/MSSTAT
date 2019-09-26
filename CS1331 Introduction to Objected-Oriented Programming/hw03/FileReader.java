@@ -1,8 +1,8 @@
+  // I worked on the homework assignment alone, using only course materials.
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Scanner;
 public class FileReader {
-    // I worked on the homework assignment alone, using only course materials.
     public static void main(String[] args) throws FileNotFoundException {
         File commandsFile = new File(args[0]);
         Scanner in = new Scanner(commandsFile);
@@ -33,7 +33,7 @@ public class FileReader {
         return Math.pow(base, power);
     }
     public static String makeSubstring(String str, int startIndex, int endIndex) {
-        if (str.length() < endIndex) {
+        if (str.length() < endIndex || startIndex < 0) {
             return "Invalid command";
         }
         return str.substring(startIndex, endIndex);
