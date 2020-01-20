@@ -1,0 +1,266 @@
+---
+title: "ISyE6416 Homework1"
+author: "Jim Liu"
+date: "1/18/2020"
+header-includes:
+   - \usepackage{amsmath}
+   - \usepackage{url}
+output: 
+  pdf_document: 
+    keep_tex: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::knit_engines$set(python = reticulate::eng_python)
+options(tinytex.verbose = TRUE)
+```
+
+```{r, include=FALSE}
+options(tinytex.verbose = TRUE)
+```
+
+```{r, Import Package, echo = FALSE}
+library(reticulate)
+```
+
+#Homework 1
+
+## Problem 1 Algorithms
+
+### (b) Bisection 
+
+```{Python, echo=TRUE}
+from scipy.stats import t
+import matplotlib.pyplot as plt
+def bisection(f,a,b):
+    '''Approximate solution of f(x)=0 on interval [a,b] by bisection method.
+    ----------
+    f : function
+        The function for which we are trying to approximate a solution f(x)=0.
+    a,b : numbers
+        The interval in which to search for a solution. The function returns
+        None if f(a)*f(b) >= 0 since a solution is not guaranteed.
+    Returns
+    -------
+    x_N : number
+        The midpoint of the Nth interval computed by the bisection method. The
+        initial interval [a_0,b_0] is given by [a,b]. If f(m_n) == 0 for some
+        midpoint m_n = (a_n + b_n)/2, then the function returns this solution.
+        If all signs of values f(a_n), f(b_n) and f(m_n) are the same at any
+        iteration, the bisection method fails and return None.
+    --------
+    '''
+    if f(a)*f(b) >= 0:
+        print("Bisection method fails.")
+        return None
+    a_n = a
+    b_n = b
+    iteration = 0
+    while (b - a > (10 ** -4)):
+        m_n = (a_n + b_n)/2
+        f_m_n = f(m_n)
+        if f(a_n)*f_m_n < 0:
+            a_n = a_n
+            b_n = m_n
+        elif f(b_n)*f_m_n < 0:
+            a_n = m_n
+            b_n = b_n
+        elif f_m_n == 0:
+            print("Found exact solution.")
+            print("Iteration times: ", iteration)
+            print("Interval is: ", a_n, b_n)
+            return 'Solution point is: ', m_n
+        else:
+            print("Bisection method fails.")
+            print("Iteration times: ", iteration)
+            return None
+        iteration += 1
+    return (a_n + b_n)/2
+        
+f = lambda x: t.cdf(x, df = 5, loc=0, scale=1) - 0.95
+bisection(f, 1.291,  2.582)
+```
+
+### (c) Worst-case complexity of quicksort
+
+Worst case means:
+Given a strictly decreasing sequence with n numbers, i.e. $e_{i} < e_{j}\ for\ i\ <\ j\ where\ i,\ j\ =\ 1,\  2,\ ....,\ n$
+
+Now pick $e_{n}$ as a pivot
+\begin{align*}
+e_{n} & = n - 1 + \sum_{i = 1}^{n - 1} e_{i} \\ 
+      & = n - 1 + n - 2 + \sum_{i=2}^{n-1} e_{i}\\
+      & = n - 1 + n - 2 + ... + 1  \\
+      & = \frac{n(n - 1)}{2} = \frac{n^2 - n}{2}
+\end{align*}
+
+Therefore, $O(n^2)$ is time complexity of the worst case.
+
+### (d) Fourier transform of a delayed signal
+
+
+\begin{align*}
+F(x(t-\tau)) & = F(x(t - \tau) * h)\ where\ h = 1 \\
+             & = \iint x(t - \tau)e^{-i2\pi ft} d\tau dt \\
+& = \int[\int x(t - \tau) e^{-i2 \pi ft}dt]d \tau \\
+& = X(f)\int e^{-i2\pi f\tau} * 1 d\tau \\
+& = X(f)e^{-i2\pi f\tau}\ \ where \int e^{-i2\pi f\tau} * 1 d\tau = 1
+\end{align*}
+
+### (e) Steps for deriving FFT
+(i) 
+$e_{n}:x_{2n}$ is even-indexed samples and $o_{n}:x_{2n+1}$ is odd-indexed samples
+Given $x_{n} = 0$ if $n\notin [0, N-1]$ and N is even
+Shift coverage, i.e. $n\notin [1, N]$
+Since $e_{n} + o_{n} = x_{2n} + x_{2n+1} = 0$ i.e. $x_{2n}$ where N/2 samples are not equal to 0,
+$x_{2n} = 0\ if\ n\notin [1, N/2]$ Then, we shifted coverage again. We get $n\notin [0, N/2 - 1]$
+(ii)
+Goal: $\tilde{x} = \sum_{j = 0}^{N - 1} x_{j}e^{-i\frac{2\pi}{N}jk} = \sum_{j=0}^{N-1}x_{j}W_{N}$
+
+\begin{align*}
+\tilde{x} &= \sum_{n=0}^{N-1}x_{n}e^{-i\frac{2\pi}{N}nk} \\
+&= \sum_{n=0, even}^{N/2-1}x_{n}e^{-i\frac{2\pi}{N}nk} + \sum_{n=0, odd}^{N/2-1}x_{n}e^{-i\frac{2\pi}{N}nk}\\
+&= \sum_{n=0}^{N/2-1}x_{2n}e^{-i\frac{2\pi}{N}2nk} + \sum_{n=0}^{N/2-1}x_{2n+1}e^{-i\frac{2\pi}{N}(2n+1)k}\\
+&= \sum_{n=0}^{N/2-1}e_{n}e^{-i\frac{2\pi}{N/2}nk}+\sum_{n=0}^{N/2-1}o(n)e^{-i\frac{2\pi}{N/2}nk}e^{-i\frac{2\pi}{N}k}\\
+&= \frac{1}{2}\sum_{n=0}^{N/2-1}2e_{n}(W_{N/2})^{kn} + \frac{1}{2}W_{n}\sum_{n=0}^{N/2-1}2o_{n}(W_{N/2})^{kn} \\
+&= \frac{1}{2}\tilde{E_{k}} + \frac{1}{2}W_{N}^{k}\tilde{O_{k}}
+\end{align*}
+
+(iii)
+
+\begin{align*}
+\tilde{E}_{k+N/2} &= 2 \sum_{n=0}^{N/2-1}e_{n}W_{N/2}^{n(k+N/2)}\\
+&= 2\sum_{n=0}^{N/2-1}e_{n}W_{N/2}^{nk}W_{N/2}^{ \frac{nN}{2}}\\
+&= 2\sum_{n=0}^{\frac{N}{2}-1}e_{n}e^{-i\frac{2\pi}{\frac{N}{2}}nk}e^{-i\frac{2\pi}{\frac{N}{2}}\frac{nN}{2}}\\
+\end{align*}
+
+Now consider $e^{-i\frac{2\pi}{\frac{N}{2}}\frac{nN}{2}}$
+By Euler formula,
+\begin{align*}
+e^{-i\frac{2\pi}{\frac{N}{2}}\frac{nN}{2}} &= e^{-i2n\pi}\\
+&= \cos(2n\pi) - isin(2n\pi)\\
+&= 1 - 0 = 1 \tag{1}
+\end{align*}
+
+By (1),
+\begin{align*}
+2\sum_{n=0}^{\frac{N}{2}-1}e_{n}e^{-i\frac{2\pi}{\frac{N}{2}}nk}e^{-i\frac{2\pi}{\frac{N}{2}}\frac{nN}{2}} = 2\sum_{n=0}^{\frac{N}{2}-1}e_{n}e^{-i\frac{2\pi}{\frac{N}{2}}nk} = \tilde{E}_{k}\\
+\end{align*}
+Similarly, 
+\begin{align*}
+\tilde{O}_{k+N/2} &= 2\sum_{n=0}^{\frac{N}{2}-1}o_{n}e^{-i\frac{2\pi}{\frac{N}{2}}nk}\\
+&= \tilde{O}_{k} 
+\end{align*}
+
+## Problem 2 Basic linear algebra and statistical inference
+
+### (a) Rank of a product
+\begin{align*}
+A_{4\times 3} =
+\begin{bmatrix}
+a_{11} & a_{12} & a_{13}\\
+a_{21} & a_{22} & a_{23}\\
+a_{31} & a_{32} & a_{33}\\
+a_{41} & a_{42} & a_{43}
+\end{bmatrix}
+,
+B_{3\times 5} =
+\begin{bmatrix}
+b_{11} & b_{12} & b_{13} & b_{14} & b_{15}\\
+b_{21} & b_{22} & b_{23} & b_{24} & b_{25}\\
+b_{31} & b_{32} & b_{33} & b_{34} & b_{35}
+\end{bmatrix}
+\\
+AB_{4\times 5} = 
+\begin{bmatrix}
+Ab_1 & Ab_2 & Ab_3 & Ab_4 & Ab_5
+\end{bmatrix}
+\end{align*}
+
+Now we could investigate some cases about AB matrix from the given assumption,
+(i) B is singular
+B is singular $\Rightarrow$ rank(AB) $\leq$ rank(B)
+(ii) A is singular
+A is singular $\Rightarrow$ rank(AB) $\leq$ rank(A)
+Therefore, rank(AB) depends on whether A or B is singular.
+i.e. rank(AB) $\leq$ min(rank(A), rank(B))
+Back to question, value r is 2.
+
+### (b) Simple Bayesian inference
+(i) 
+
+Prior:$p(\mu) N(\theta,\,\tau^{2})$
+Observed data:$ x   {N}(\mu,\,\sigma^{2})$
+
+Those two distributions are i.i.d.
+And posterior distribtion is:
+\begin{align*}
+f(\mu\mathbin{\vert}x) &= \frac{f(x\mathbin{\vert}\mu)p(\mu\mathbin{\vert}\tau)}{f(\mu)}\\
+\end{align*}
+
+\begin{align*}
+f(\mu\mathbin{\vert}x) &= \Pi_{i=1}^{n=1}\frac{1}{\sqrt{2\pi}\sigma}e^{\frac{-(x_{i} - \mu)^2}{2\sigma^2}}\times \frac{1}{\sqrt{2\pi}\tau}e^{\frac{-(\mu - \theta)^2}{2\tau^2}}\\
+& \propto e^{-\frac{1}{2}\sum_{i=1}^{n=1}\frac{(x_{i}-\mu)^2}{\sigma^2} + \frac{(\mu-\theta)^2}{\tau^2}}\\
+&= e^{-\frac{1}{2}\frac{(\sum_{i=1}^{n=1}x_{i}^2 - 2\mu\sum_{i=1}^{n=1}x_{i}+n\mu^2)}{\sigma^2} + \frac{\mu^2-2\mu\theta+\theta^2}{\tau^2}}\\
+&= e^{- \frac{1}{2}[(\frac{n}{\sigma^2}+\frac{1}{\tau^2})\mu^2-2(\frac{n\bar{x}}{\sigma^2}+\frac{\theta}{\tau^2})\mu + \frac{(\sum_{i=0}^{n=1}x_{i}^2)}{\sigma^2}+\frac{\theta^2}{\tau^2}]}\\
+& \propto e^{-\frac{1}{2}\frac{(\mu-\mu_{posterior})^2}{\tau_{posterior}^2}}\\
+&= e^{-\frac{1}{2}\frac{\mu^2-2\mu\mu_{posterior}+\mu_{posterior}^2}{\tau_{posterior}^2}}\ where\ n=1\ i.e.x = x_{1} \\
+&\frac{1}{\tau_{posterior}^2} = \frac{1}{\sigma^2}+\frac{1}{\tau^2} \implies \tau_{posterior} = \frac{\tau^2\sigma^2}{\tau^2 + \sigma^2}\\
+\\
+&\frac{\mu_{posterior}}{\tau_{posterior}^2} = \frac{x}{\sigma^2}+\frac{\theta}{\tau^2} \implies \mu_{posterior} = \frac{\tau^2}{\tau^2 + \sigma^2}x + \frac{\sigma^2}{\tau^2 + \sigma^2}\theta\\
+& N(\frac{\tau^2}{\tau^2 + \sigma^2}x + \frac{\sigma^2}{\tau^2 + \sigma^2}\theta,\frac{\tau^2\sigma^2}{\tau^2 + \sigma^2})
+\end{align*}
+
+(ii)
+Prior: $p(\mu)    Uniform(0,\,1)$\\,
+observed data:$x  N(\mu,\,\sigma^{2})$\\
+Those two distributions are i.i.d.\\
+And posterior distribtion is:\\
+\begin{align*}
+f(\mu\mathbin{\vert}x) &= \frac{f(x\mathbin{\vert}\mu)p(\mu\mathbin{\vert}\tau)}{f(\mu)}\\
+f(\mu\mathbin{\vert}x) &= \Pi_{i=1}^{n=1}\frac{1}{\sqrt{2\pi}\sigma}e^{\frac{-(x_{i} - \mu)^2}{2\sigma^2}}\times 1\\
+& N(\mu, \sigma^2)
+\end{align*}
+
+### (c) Maximum likelihood estimator
+
+(i) Find MLE
+
+\begin{align*}
+L(a,b\mathbin{\vert}x) & \triangleq \Pi_{i=1}^{n}f(x) = (\frac{1}{b-a})^nI(a,b)^n\\
+& = (\frac{1}{b-a})^nI(a\leq x_{i})I(x_{i}\leq b)
+\end{align*}
+
+According to MLE, our goal is to find a parameter that most likely occurrs.
+Now, we have some cases to consider:
+$\hat{a} = arg\max\limits_{a}L(a,b\mathbin{\vert}x) \implies \hat{a} = X_{(1)}\  [order\ statistics, b\ fixed] $
+$\hat{b} = arg\max\limits_{b}L(a,b\mathbin{\vert}x) \implies \hat{b} = X_{(n)}\  [order\ statistics, a\ fixed] $
+
+(b) Are $\hat{a}, \hat{b}$ unbiased estimators?
+
+
+### (d) Hypothesis test of the mean
+
+Hypothese Testing:
+$$
+H_{0}:\mu = \mu_0 = 75\ \ [Null\ Hypothesis]\\
+H_{1}:\mu = \mu_{1} < \mu_{0}\ \ [Alternatice Hypothesis]
+$$
+In this case, we try to know additive is effective or not. $H_{0}$ means new additive does not have any effect.
+\newline
+Likelihood Ration Test:
+
+\begin{align*}
+\lambda(\mu_{0}, \mu_{1}) &= \Pi_{i=1}^{25}\frac{1}{\sqrt{2\pi}9}e^\frac{-(x_{i}-\mu_{1})^2}{2\times9^2}/\Pi_{i=1}^{25}\frac{1}{\sqrt{2\pi}9}e^\frac{-(x_{i}-75)^2}{2\times9^2}\\
+& = e^{(-\sum_{i=1}^{25}(x_{i}-\mu_{1}) + \sum_{i=1}^{25}(x_{i}-75)^2)/2\times 9^2} > b\\
+\ell(\lambda(\mu_{0}, \mu_{1})) &= -\sum_{i=1}^{25}(x_{i}-\mu_{1}) + \sum_{i=1}^{25}(x_{i}-75)^2 > b\times 2 \times 9^2 = b_{1}\\
+&\implies \sum_{i=1}^{25}-2\mu_{1}x_{i} + \sum_{i=1}^{25}-150x_{i} + 75^2 - \mu_{1}^2 > b1\\
+& \implies \sum_{i=1}^{25}x_{i}(-2\mu_{i}-150) > b1 - 75^2 + \mu_{1}^2 = b_{2}\ where\ -2\mu_{i}-150 < 0\\
+& \implies (\sum_{i=1}^{25}x_{i})/25 < b_{2}(-2\mu_{i}-150)/25 = b_{3}\\
+& s.t.\ P(\bar{x} < b_{3} \mathbin{\vert}\mu = \mu_{0}) = \alpha=0.05\\
+& i.e.\ P(\bar{x}-\mu_{0}/\sqrt{18/25} < - Z_{0.05, n =25} \mathbin{\vert}\mu = \mu_{0}) = 0.05 \\
+& i.e. \ P(\bar{x}-\mu_{0}/\sqrt{18/25} < - Z_{0.05, n =25} \mathbin{\vert}\mu = \mu_{0}) = 0.05\\
+& i.e. \ P(\bar{x}-\mu_{0}/\sqrt{18/25} < -  1.645 \mathbin{\vert}\mu = \mu_{0}) = 0.05
+\end{align*}
+From the above calculation, the threshold is -1.645.
