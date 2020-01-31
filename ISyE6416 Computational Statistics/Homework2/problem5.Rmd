@@ -1,0 +1,34 @@
+---
+title: "ISyE6416HW2"
+author: "Jim Liu"
+date: "1/30/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE, warning=FALSE, message=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r House, echo=FALSE, include=FALSE}
+house <- read.table("/Users/jim/Dropbox (GaTech)/Courses/ISyE6416/Homework/Homework2/RealEstate.csv", header=TRUE, 
+   sep=",")
+house
+
+# Drop the columns of the dataframe
+house <- house[,1:7]
+house
+```
+
+```{r, echo=TRUE}
+pricing <- glm(Price ~ factor(Location) + MLS + factor(Bedrooms) + factor(Bathrooms) + Size +
+                 Price.SQ.Ft, data = house)
+summary(pricing)
+```
+After running glm on categorical and continuous variables, we could infer some of useful
+Our model is $Price = \beta_{0} + \beta_{1}MLS + \beta_{2}Bedrooms + \beta_{3}Bathrooms + \beta_{4}Size + \beta_{5}Price.SQ.Ft +$ different location with different coeeficients. From the above output, if the p-value (***) of each categorical is greater than critical region. That is, we will think this location has influence on house price. And for the number of bathrooms or bedrooms, 5 bathrooms, 2 bedrooms to 4 bedrooms have influence on house price. As for other continuous varibles, we could clearly see size and price.sq.ft has stronger imapct on price. Furthermore, after searching these locations, we could easily find if the location is city, those p-values are possibly less than critical reigion. And most of locations is near ocean.
+
+
+
+
+
