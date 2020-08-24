@@ -1,0 +1,39 @@
+body {
+    font-family: "Open Sans";
+}
+
+body div:nth-child(1) {
+	position: absolute;
+	top: 10px;
+	left: 10px;
+	border: gray solid 1px;
+
+	width: 400px;
+	height: 300px;
+}
+
+body div:nth-child(2) {
+	position: absolute;
+	top: 10px;
+	left: 420px;
+	border: gray solid 1px;
+
+	width: 400px;
+	height: 300px;
+}
+
+body div:nth-child(3) {
+	position: absolute;
+	top: 320px;
+	left: 10px;
+	border: gray solid 1px;
+	margin-bottom: 10px;
+
+	width: 400px;
+	height: 300px;
+}
+
+div svg {
+	width: 400px;
+	height: 300px;
+}
