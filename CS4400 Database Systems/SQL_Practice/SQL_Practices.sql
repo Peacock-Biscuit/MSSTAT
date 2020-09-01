@@ -1,7 +1,8 @@
--- Practice 0
+-- practiceQuery0: [book 0] Retrieve the birth date and address of the employees whose name is 'John Smith'.
 CREATE OR REPLACE VIEW Practice0 as 
 SELECT bdate, address FROM employee WHERE lname="Smith" AND fname="John";
--- Practice 1  
+-- practiceQuery1: [book 1] Retrieve the first name, last name 
+-- and address of all employees who work for the 'Research' department. 
 CREATE OR REPLACE VIEW Practice1 as 
 SELECT fname, lname, address FROM employee WHERE dno = 5;
 -- practiceQuery2: [book 2] For every project located in 'Stafford', list the project number, the controlling department number,
@@ -15,25 +16,49 @@ LEFT JOIN employee e2 ON c.mgrssn=e2.ssn) f;
 
 -- practiceQuery3: [book 3] Find the names of employees who work on all the projects controlled by department number 5.
 -- CREATE OR REPLACE VIEW Practice3 as
-SELECT pname FROM project WHERE dnum=5;
+CREATE OR REPLACE VIEW Practice3 as
+SELECT fname, lname FROM employee e
+LEFT JOIN (
+SELECT * FROM (
+SELECT essn, COUNT(essn) AS "Num" FROM works_On WHERE pno=1 OR pno=2 OR pno=3 GROUP BY essn) a WHERE a.Num=3) b
+ON e.ssn=b.essn WHERE b.Num=3;
 
--- Practice 4
--- CREATE OR REPLACE VIEW Practice4 as
-SELECT pnumber, dnum, dno, lname FROM project, employee WHERE lname = "Smith"; 
+-- practiceQuery4: [book 4] Make a list of project numbers for projects that involve an employee whose last name is 'Smith', 
+-- either as a worker or as a manager of the department that controls the project.
+CREATE OR REPLACE VIEW Practice4 as
+SELECT b.pno FROM (SELECT * FROM employee) a 
+LEFT JOIN (
+SELECT essn, pno FROM works_on) b ON b.essn=a.ssn WHERE a.lname="Smith";
 
 -- practiceQuery5: [book 5] List the names of all employees with two or more dependents.
--- CREATE OR REPLACE VIEW Practice5 as
-SELECT fname, lname FROM employee, dependent  ;
+CREATE OR REPLACE VIEW Practice5 as
+SELECT a.fname, a.lname FROM (
+SELECT * FROM employee) a 
+INNER JOIN (
+SELECT essn, COUNT(essn) FROM dependent GROUP BY essn HAVING COUNT(*) > 2) b ON a.ssn=b.essn ;
 
 -- practiceQuery6: [book 6] Retrieve the names of employees who have no dependents.
--- CREATE OR REPLACE VIEW Practice6 as
-SELECT fname, lname FROM employee WHERE ssn not in (SELECT essn FROM dependent);
+CREATE OR REPLACE VIEW Practice6 as
+SELECT fname, lname FROM (
+SELECT * FROM employee) a 
+LEFT JOIN (
+SELECT essn, COUNT(*) AS "Num" FROM dependent GROUP BY essn) b ON a.ssn=b.essn WHERE b.Num is NULL;
 
 -- practiceQuery7: [book 7] List the names of managers who have at least one dependent.
--- CREATE OR REPLACE VIEW Practice7 as
+CREATE OR REPLACE VIEW Practice7 as
+SELECT fname, lname FROM employee e
+INNER JOIN (
+SELECT DISTINCT(superssn) AS mgrssn FROM (
+SELECT * FROM employee) a
+LEFT JOIN (
+SELECT essn, COUNT(*) AS "Num" FROM dependent GROUP BY essn) b ON a.superssn=b.essn WHERE b.Num>0) c 
+ON c.mgrssn=e.ssn;
 
--- Practice 8
--- CREATE OR REPLACE VIEW Practice8 as
+-- practiceQuery8: [book 8] For each employee, retrieve the employee's first
+-- and last name and the first and last name of his or her immediate supervisor.
+CREATE OR REPLACE VIEW Practice8 as
+SELECT e1.fname, e1.lname, e2.fname, e2.lname FROM employee e1
+LEFT JOIN employee e2 ON e1.superssn=e2.ssn;
 
 -- practiceQuery9: [book 9] Select all of the employee's Social Security Numbers.
 CREATE OR REPLACE VIEW Practice9 as 
@@ -54,7 +79,15 @@ SELECT fname, lname FROM employee WHERE address LIKE '%Houston%';
 
 -- practiceQuery13: [book 13] Show the first and last names and resulting salaries 
 -- if every employee working on the 'ProductX' project is given a 10% raise.
-
+CREATE OR REPLACE VIEW Practice13 as
+SELECT fname, lname, Max(salary) FROM (
+SELECT fname, lname, salary FROM employee e2
+UNION
+SELECT fname, lname, salary * 1.1 FROM employee e 
+INNER JOIN (
+SELECT essn FROM works_on w
+INNER JOIN (
+SELECT pnumber FROM project WHERE pname="ProductX") p ON p.pnumber=w.pno) c ON e.ssn=c.essn) f GROUP BY fname, lname;
 
 -- practiceQuery14: [book 14] Retrieve all information for employees in department 5 
 -- whose salary is between $30,000 and $40,000.
@@ -64,6 +97,8 @@ SELECT * FROM employee WHERE dno=5 and salary BETWEEN 30000 AND 40000;
 -- practiceQuery15: [book 15] Retrieve a list of department names, employee first and last names, 
 -- and the project names they are working on, ordered by department 
 -- and, within each department, ordered alphabetically by last name, then first name.
+SELECT d.dname, fname, lname FROM employee e
+LEFT JOIN department d ON d.dnumber=e.dno;
 
 -- practiceQuery16: [book 16] Retrieve the name of each employee 
 -- who has a dependent with the same first name and is the same sex as the employee.
@@ -127,9 +162,14 @@ LEFT JOIN (SELECT pno, COUNT(pno) AS Num FROM works_on GROUP BY pno) w ON w.pno 
 SELECT * FROM project ;
 
 
--- practiceQuery28: [book 28] For each department that has less than four* employees, retrieve the department number and the number of its employees 
--- who are making more than $25,000*.
--- Less than four employees instead of more than five, and $25,000 instead of $40,000 to make the results more fruitful.
+-- practiceQuery28: [book 28] For each department that has less than four employees, 
+-- retrieve the department number and the number of its employees who are making more than $25,000.
+CREATE OR REPLACE VIEW Practice28 as
+SELECT b.dno, COUNT(*) FROM (
+SELECT dno, ssn, salary FROM employee WHERE salary > 25000) a
+LEFT JOIN (
+SELECT dno FROM employee GROUP BY dno HAVING COUNT(*) < 4) b ON b.dno=a.dno WHERE b.dno is NOT NULL GROUP BY b.dno; 
+
 
 -- practiceQuery29: [book 1c] Retrieve all of the attribute values for any employee who works in department 5.
 CREATE OR REPLACE VIEW Practice29 as
