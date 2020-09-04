@@ -1,0 +1,107 @@
+---
+title: "hw1"
+author: "Jim Liu"
+date: "8/27/2020"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# ISyE 6402 Homework 1
+
+## Question 1: Temperature Analysis (30 Points)
+
+In this problem, we will analyze aggregated temperature data.
+
+Data file LA Temp Monthly.csvPreview the document contains the monthly average temperature of Los Angeles from January 1950 through December 2018. Run the following code to prepare the data for analysis:
+```{r}
+library(mgcv)
+time2 <- read.csv("/Users/jim/Dropbox (GaTech)/Courses/ISyE6402/Homework/HW1/LA Temp Monthly.csv")
+df = data.frame(time2)
+```
+
+
+```{r}
+#Note 'TSA' is now depreciated, use the following to load the parent library
+library(locfit)
+library(mgcv)
+data <- read.csv("/Users/jim/Dropbox (GaTech)/Courses/ISyE6402/Homework/HW1/LA Temp Monthly.csv")
+data <- data[,2]
+#Convert to TS data in proper frame
+temp <- ts(data,start=c(1950,1),freq=12)
+```
+
+### Question 1a: Exploratory Data Analysis 
+
+* Plot the Time Series and ACF plots. Comment on the main features, and identify what (if any) assumptions of stationarity are violated. 
+Hint: Before plotting, can you infer anything from the nature of the data?
+
+Before we plot time series, we could see there might be an increasing pattern because there is no one data point whihc is less than 46.8 except itself.
+```{r Pre-Plot}
+data < 46.8
+``` 
+
+```{r Plot}
+ts.plot(temp, lwd=1, ylab="Temperature")
+```
+
+```{r ACF}
+acf(temp)
+```
+
+For the time Series plot, we could clearly see an increasing pattern of temperature from year to year. As for the ACF plot, there is a seasonality .
+
+* On its own, which type of model do you think will fit the data best: trend or seasonality fitting?
+Seasonality model fit the data best since from acf plot, we could see a periodic pattern. If it were a trend model, the acf plot would be like decay with time t.
+
+
+### Question 1b: Trend Estimation
+
+Fit the following trend estimation models:
+
+* Moving average
+* Parametric quadratic polynomial
+* Local Polynomial
+* Splines
+
+Overlay the fitted values on the original time series.  Construct and plot the residuals with respect to time and ACF of residuals. Comment on the four models fit and on the appropriateness of the stationarity assumption of the residuals.
+
+(1) Moving Average
+
+```{r moving average}
+library(zoo)
+library(ggplot2)
+mvg = rollmean(temp, 20)
+time.pts = c(1:length(temp)) # 1656 even
+time.pts = c(time.pts-min(time.pts))/max(time.pts)
+maf = ksmooth(time.pts, temp, kernel = "box", bandwidth=1)
+maf_fit = ts(maf$y, start=c(1950,1), frequency = 12)
+
+# plot(temp, ylab="Temperature")
+# lines(mvg, lwd=2, col="brown")
+# lines(maf_fit, lwd=2, col='red')
+# abline(maf_fit[1],0,lwd=2, col='blue')
+# ggplot(data=df, aes(x=Date, y=Temp)) + geom_line() 
+library(ggfortify)
+ggfortify(temp)
+```
+```{r}
+library(ggfortify)
+ggfortify(temp)
+```
+
+
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
