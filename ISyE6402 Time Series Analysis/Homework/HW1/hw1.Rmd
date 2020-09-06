@@ -3,6 +3,7 @@ title: "hw1"
 author: "Jim Liu"
 date: "8/27/2020"
 output:
+  pdf_document: default
   html_document:
     df_print: paged
 ---
@@ -18,12 +19,11 @@ knitr::opts_chunk$set(echo = TRUE)
 In this problem, we will analyze aggregated temperature data.
 
 Data file LA Temp Monthly.csvPreview the document contains the monthly average temperature of Los Angeles from January 1950 through December 2018. Run the following code to prepare the data for analysis:
-```{r}
-library(mgcv)
+
+```{r, echo=FALSE}
 time2 <- read.csv("/Users/jim/Dropbox (GaTech)/Courses/ISyE6402/Homework/HW1/LA Temp Monthly.csv")
 df = data.frame(time2)
 ```
-
 
 ```{r}
 #Note 'TSA' is now depreciated, use the following to load the parent library
@@ -40,23 +40,26 @@ temp <- ts(data,start=c(1950,1),freq=12)
 * Plot the Time Series and ACF plots. Comment on the main features, and identify what (if any) assumptions of stationarity are violated. 
 Hint: Before plotting, can you infer anything from the nature of the data?
 
-Before we plot time series, we could see there might be an increasing pattern because there is no one data point whihc is less than 46.8 except itself.
-```{r Pre-Plot}
+```{r Pre-Plot, echo=TRUE}
 data < 46.8
 ``` 
+Before we plot time series, we could see there might be an increasing pattern because there is no one data point whihc is less than 46.8 except itself.
 
-```{r Plot}
-ts.plot(temp, lwd=1, ylab="Temperature")
+```{r Time Series Plot}
+library(ggfortify)
+autoplot(temp) + labs(title="Temperature")
 ```
 
-```{r ACF}
+```{r ACF for Temperature}
 acf(temp)
 ```
+* Comment on the main features, and identify what (if any) assumptions of stationarity are violated. 
 
-For the time Series plot, we could clearly see an increasing pattern of temperature from year to year. As for the ACF plot, there is a seasonality .
+For the time Series plot, we could clearly see an increasing pattern of temperature from year to year. But, this increasing trend is not big, but a little slowly going up. As for the ACF plot, there is seasonality. Therefore, it violates autocovariance independent of time clearly. Plus, it also violates constant mean assumption although it is a little increasing.
 
 * On its own, which type of model do you think will fit the data best: trend or seasonality fitting?
-Seasonality model fit the data best since from acf plot, we could see a periodic pattern. If it were a trend model, the acf plot would be like decay with time t.
+
+Seasonality model fit the data best since from acf plot, we could see a periodic pattern. And there is an increasing trend, but seasonality problem should be addressed first.
 
 
 ### Question 1b: Trend Estimation
@@ -70,38 +73,390 @@ Fit the following trend estimation models:
 
 Overlay the fitted values on the original time series.  Construct and plot the residuals with respect to time and ACF of residuals. Comment on the four models fit and on the appropriateness of the stationarity assumption of the residuals.
 
+* Overlay the fitted values on the original time series.
+
 (1) Moving Average
 
-```{r moving average}
-library(zoo)
-library(ggplot2)
-mvg = rollmean(temp, 20)
+```{r Moving Average}
 time.pts = c(1:length(temp)) # 1656 even
 time.pts = c(time.pts-min(time.pts))/max(time.pts)
 maf = ksmooth(time.pts, temp, kernel = "box", bandwidth=1)
 maf_fit = ts(maf$y, start=c(1950,1), frequency = 12)
 
-# plot(temp, ylab="Temperature")
-# lines(mvg, lwd=2, col="brown")
-# lines(maf_fit, lwd=2, col='red')
-# abline(maf_fit[1],0,lwd=2, col='blue')
-# ggplot(data=df, aes(x=Date, y=Temp)) + geom_line() 
-library(ggfortify)
-ggfortify(temp)
+plot(temp, ylab="Temperature")
+lines(maf_fit, lwd=2, col='red') # use kernel
+abline(maf_fit[1],0,lwd=2, col='blue') # compare trend
 ```
+
+(2) Parametric quadratic polynomial
+
+```{r Polynomial}
+poly_model = lm(data ~ poly(time.pts,degree=2))
+poly_model_fit = ts(fitted(poly_model),start=c(1950,1), frequency = 12)
+plot(temp, ylab="Temperature")
+lines(poly_model_fit, lwd=2, col='red')
+abline(poly_model_fit[1], 0, lwd=2, col='blue')
+summary(poly_model)
+```
+
+(3) Local Polynomial
+
+```{r LOESS}
+# loess
+loc_fit = loess(temp~time.pts)
+temp_loc_fit = ts(fitted(loc_fit), start=c(1950,1), frequency = 12)
+plot(temp, ylab="Temperature")
+lines(temp_loc_fit, lwd=2, col='red')
+abline(temp_loc_fit[1], 0, lwd=2, col='blue')
+```
+
+(4) Splines
+
+```{r Splines}
+sp_fit = gam(temp~s(time.pts))
+temp_sp_fit = ts(fitted(sp_fit), start=c(1950,1), frequency = 12)
+
+plot(temp, ylab="Temperature")
+lines(temp_sp_fit, lwd=2, col='red')
+abline(temp_sp_fit[1], 0, lwd=2, col="blue")
+summary(temp_sp_fit)
+```
+
+* Construct and plot the residuals with respect to time and ACF of residuals. 
+
+```{r ACF residuals}
+par(mfrow=c(2,1))
+ploy_res = temp - poly_model_fit
+plot(ploy_res)
+acf(ploy_res, lag.max=12*8)
+# maf_res = maf_fit - temp
+# acf(maf_res)
+```
+
+```{r Moving Average Residual}
+par(mfrow=c(2,1))
+maf_res = temp - maf_fit
+plot(maf_res)
+acf(maf_res, lag.max=12*8)
+```
+
+
+```{r LOESS residual}
+par(mfrow=c(2,1))
+loc_res = temp - temp_loc_fit
+plot(loc_res)
+acf(loc_res, lag.max=12*8)
+```
+
+```{r Spline Residual}
+par(mfrow=c(2,1))
+
+sp_res = temp - temp_sp_fit
+plot(sp_res)
+acf(sp_res, lag.max=12*8)
+```
+
+
+
+```{r comparision}
+all_val = c(maf_fit, poly_model_fit, temp_loc_fit, temp_sp_fit)
+y_bound = c(min(all_val), max(all_val))
+plot(poly_model_fit, lwd=2, col="green", ylim=y_bound,ylab="Temperature")
+lines(maf_fit, lwd=2, col="purple")
+lines(temp_sp_fit, lwd=2, col="red")
+lines(temp_loc_fit, lwd=2, col="brown")
+legend(x= "topleft",legend=c("MAV","LM","GAM","LOESS"),lty=1, col=c("purple","green","red","brown"))
+```
+
+* Comment on the four models fit and on the appropriateness of the stationarity assumption of the residuals.
+
+Based on above plot, we could see GAM and LOESS go up quickly after 2010. I think it is not good estimation because global warming or temperature increasing would not increase quickly so I prefer using moving average method at this point.
+As for stationary assumption, in this time series data, the most important issue is seasonality. By just estimating trend, the seasonality pattern still exists from ACF plots.
+
+### Question 1c: Seasonality Estimation
+
+Seasonality Estimation:
+
+Fit the following seasonality estimation models.
+
+* Categorical Linear Regression (ANOVA)
+* COS-SIN
+
+Overlay the fitted values on the original time series.  Construct and plot the residuals with respect to time and ACF plots. Comment on how the two models fit and on the appropriateness of the stationarity assumption of the residuals. Also compare the fits to those in part B and comment if your initial prediction was correct.
+
+```{r ANOVA and COS-SIN}
+library(dynlm)
+# Seasonal Means Model
+model1 = dynlm(temp~season(temp))
+summary(model1)
+
+## without intercept
+model2 = dynlm(temp~season(temp)+0)
+summary(model2)
+
+## harmonic
+model3 = dynlm(temp~harmon(temp, 1))
+summary(model3)
+
+model4 = dynlm(temp~harmon(temp, 2))
+summary(model4)
+
+series1 = coef(model2)
+series2 = fitted(model4)[1:12]
+plot(1:12, series1, lwd=2, type="l",xlab="Month", ylab="Temperature")
+lines(1:12, series2, lwd=2, col="blue")
+legend(x= "topleft",legend=c("ANOVA","COS-SIN"), lty=1, col=c("BLACK","blue"))
+```
+
+* Overlay the fitted values on the original time series.
+
+```{r ANOVA model}
+cat_lm = ts(fitted(model2), start=c(1950,1), frequency = 12)
+plot(temp, ylab="Temperature")
+lines(cat_lm, lwd=2, col='red')
+```
+```{r COS-SIN model}
+harmon_lm = ts(fitted(model4), start=c(1950,1), frequency = 12)
+plot(temp, ylab="Temperature")
+lines(harmon_lm, lwd=2, col='red')
+```
+
+* Construct and plot the residuals with respect to time and ACF plots.
+
+```{r ANOVA Residues}
+par(mfrow=c(2,1))
+
+cat_res = temp - cat_lm
+plot(cat_res)
+acf(cat_res, lag.max=12*8)
+```
+
+```{r COS-SIN Residue}
+par(mfrow=c(2,1))
+
+har_res = temp - harmon_lm
+plot(har_res)
+acf(har_res, lag.max=12*8)
+```
+
+* Comment on how the two models fit and on the appropriateness of the stationarity assumption of the residuals. Also compare the fits to those in part B and comment if your initial prediction was correct.
+
+As for two models, there is no so much difference. True, based on two methods, we would like to address seasonality first. But after seeing the ACF plots for seaonality estimation, we think we should estimate trend and seasonality at the same time. ACF plots shows that after seasonality removal, there is a trend pattern that decays with time.
+
+
+## Question 2: Currency Conversion Analysis (40 Points)
+
+In this problem, we will study fluctuations in currency exchange rate over time.
+
+File USD-EUR Exchange.csvPreview the document contains the average exchange rate of USD/EUR from January 2000 through June 2019, aggregated weekly (ending Wednesdays). Load and prep the data for analysis with the following code:
+
+
+```{r Currency Data}
+library(locfit)
+library(mgcv)
+#Load data
+data2 <- read.csv("/Users/jim/Dropbox (GaTech)/Courses/ISyE6402/Homework/HW1/USD-EUR Exchange.csv")
+data2 <- data2[,2]
+#Convert to TS data in proper frame
+rate <- ts(data2,start=c(2000,1),freq=52)
+#Generate differenced data
+rate.dif <- diff(rate)
+```
+
+### Question 2a: Exploratory Data Analysis 
+
+Plot the Time Series and ACF plots. Comment on the main features, and identify what (if any) assumptions of stationarity are violated.
+
+Using the differenced rate data ('rate.dif'), plot both the Time Series and ACF plots. Comment on the main features, and identify what (if any) assumptions of stationarity are violated. Additionally comment if you believe the differenced data is more appropriate for use in analysis. Support your position with your graphical analysis.
+
+
+* Plot the Time Series and ACF plots. Comment on the main features, and identify what (if any) assumptions of stationarity are violated.
+
+```{r Currency Time Series}
+par(mfrow=c(2,1))
+ts.plot(rate, ylab="Rate")
+acf(rate, lag.max = 52 * 8)
+```
+
+Seeing these two plots, we could not tell there is a trend or seasonality from time series plot. But, ACF plot tells me there is a trend increasing and then decreasing.
+
+* Using the differenced rate data ('rate.dif'), plot both the Time Series and ACF plots. 
+
+* plot both the Time Series and ACF plots
+
+```{r Rate Difference Time Series}
+par(mfrow=c(2,1))
+ts.plot(rate.dif, ylab="Rate")
+acf(rate.dif, lag.max = 8)
+```
+
+* Comment on the main features, and identify what (if any) assumptions of stationarity are violated. Additionally comment if you believe the differenced data is more appropriate for use in analysis. Support your position with your graphical analysis.
+
+From the time series plot, except around 2008 (Financial Crisis) with large fluctuation, the time series is seemly like a stationary process. And, from the ACF plot, we could see it is like stationary process. Plus, based on the plots, there is no violations for assumptionas of stationarity. So differenced data is more appropriate.
+ 
+
+### Question 2b: Trend-Seasonality Estimation
+
+Using the original time series data, fit the following models to estimate both trend and seasonality:
+
+* Parametric Polynomial Regression
+* Non-parametric model
+
+Overlay the fitted values on the original time series. Construct and plot the residuals with respect to time and ACF of residuals. Comment on how the two models fit and on the appropriateness of the stationarity assumption of the residuals.
+For sake of simplicity, only use Categorical Regression (ANOVA) seasonality modelling.
+
+
+* Parametric Polynomial Regression
+
+```{r Linear Model}
+library(zoo)
+library(dynlm)
+lm_fit_par = dynlm(rate~trend(rate)+season(rate))
+## Polynomial
+poly_time.pts = c(1:length(rate))
+poly_time.pts = c(poly_time.pts-min(poly_time.pts))/max(poly_time.pts)
+x1_square = poly_time.pts
+x2_square = poly_time.pts^2
+lm_fit_square = dynlm(rate~x1_square+x2_square+season(rate))
+summary(lm_fit_par)
+summary(lm_fit_square)
+
+##### compare two models
+plot(rate, lwd=2, col="black",ylab="Rate")
+lines(fitted(lm_fit_par), lwd=2, col="purple")
+lines(fitted(lm_fit_square), lwd=2, col="red")
+legend(x= "topleft",legend=c("Original" ,"Non-Polynomial","Polynomial"),lty=1, col=c("black","purple","red"))
+```
+
+* Non-parametric model
+
+```{r Non-parametric Week}
+# For sake of simplicity, only use Categorical Regression (ANOVA) seasonality modelling.
+week = dynlm(rate~season(rate)+0)
+summary(week)
+week = fitted(week)
+```
+
+```{r Non-parametric Dataset}
+## Fit a non-parametric model for trend and linear model for seasonality
+gam.fit = gam(rate~s(poly_time.pts)+week)
+gam_ts = ts(fitted(gam.fit),start=c(2000,1),freq=52)
+
+plot(gam_ts, lwd=2, ylim= c(0.8, 1.6), col="purple")
+lines(rate, lwd=2, col="black",ylab="Rate")
+lines(fitted(lm_fit_square), lwd=2, col="red")
+legend(x= "topleft",legend=c("Original" ,"Non-parametric","Polynomial"),lty=1, col=c("black","purple","red"))
+```
+
+
+* Construct and plot the residuals with respect to time and ACF of residuals.
+
+
+```{r ACF of residuals}
+par(mfrow=c(2,1))
+dif.fit.lm = ts((rate-fitted(lm_fit_square)),start=c(2000,1),freq=52)
+plot(dif.fit.lm,ylab="Residual Process")
+
+acf(rate-fitted(lm_fit_square), lag=52 * 3)
+```
+
+
 ```{r}
-library(ggfortify)
-ggfortify(temp)
+par(mfrow=c(2,1))
+res.fit.gam = ts((rate-fitted(gam.fit)),start=c(2000,1),freq=52)
+ts.plot(res.fit.gam,ylab="Residual Process")
+
+acf(rate-fitted(gam.fit), lag=52 * 3)
+```
+
+* Comment on how the two models fit and on the appropriateness of the stationarity assumption of the residuals.
+
+For model fit, I think the gerneralized addivitive model could capture the shape of time series better but based on two ACF plots, we could see they both violate constant mean assumption becasue we could see decreasing and increasing pattern in ACF plots.
+
+### Question 2c: Trend-Seasonality Estimation with Differenced Data
+
+Now using the differenced time series data, construct the same type of models as you did above.
+
+Overlay the fitted values on the original time series.Construct and plot the residuals with respect to time and ACF of residuals. Comment on the two models fit and on the appropriateness of the stationarity assumption of the residuals. Additionally, comment if models built with original or differenced data appear to differ in quality of fit; which (if any) is better?
+
+Hint:
+
+When TS data is differenced, the resulting dataset begins observations at the second time point of the original series. To ensure fitted values line up properly, convert them to time series with the following function:
+
+ts(fit, start=c(2000,2),freq=52)
+
+Where “fit” represents the appropriate fitted values. This functions communicates that the time series is broken down into 52 equal sized chunks (weeks) each year (freq=52), and that this particular series begins with the second chunk of the year 2000 (start=c(2000,2)).
+
+
+```{r Rate.dif dataset}
+#Convert to TS data in proper frame
+rate <- ts(data2,start=c(2000,1),freq=52)
+#Generate differenced data
+rate.dif <- diff(rate)
+```
+
+```{r}
+# plot(rate.dif)
+week_dif = dynlm(rate.dif~season(rate.dif)+0)
+summary(week_dif)
+week_dif = fitted(week_dif)
+```
+
+* Parametric Polynomial Regression
+
+```{r LM rate differenced data}
+library(zoo)
+library(dynlm)
+## Polynomial
+diff_time.pts = c(1:length(rate.dif))
+diff_time.pts = c(diff_time.pts-min(diff_time.pts))/max(diff_time.pts)
+x1_square_dif = diff_time.pts
+x2_square_dif = diff_time.pts^2
+lm_fit_square_diff = dynlm(rate.dif~x1_square_dif+x2_square_dif+week_dif)
+summary(lm_fit_square_diff)
+```
+
+* Non-parametric model
+
+```{r Rate differenced Non-parametric model}
+## Fit a non-parametric model for trend and linear model for seasonality
+gam.fit.dif = gam(rate.dif~s(x1_square_dif)+week_dif)
+gam_ts.dif = ts(fitted(gam.fit.dif),start=c(2000,2),freq=52)
 ```
 
 
+* Overlay the fitted values on the original time series
 
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
+```{r Comparison for rate difference}
+par(mfrow=c(1,2))
+ts.plot(ts(rate.dif,start=c(2000,2),freq=52),main='Linear Regression',ylab='Rate Differenced',col='black')
+lines(fitted(lm_fit_square_diff),col='red')
+ts.plot(ts(rate.dif,start=c(2000,2),freq=52),main='Non-Parametric Regression',ylab='Rate Differenced',col='black')
+lines(gam_ts.dif,col='red')
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+* Construct and plot the residuals with respect to time and ACF of residuals.
+
+
+```{r ACF of rate difference}
+par(mfrow=c(2,1))
+res.fit.lm.dif = ts((rate.dif-fitted(lm_fit_square_diff)),start=c(2000,2),freq=52)
+plot(res.fit.lm.dif,ylab="Residual Process")
+
+acf(rate.dif-fitted(lm_fit_square_diff), lag=52 * 6)
+```
+
+
+```{r acf for rate difference}
+par(mfrow=c(2,1))
+res.fit.gam.dif = ts((rate.dif-gam_ts.dif),start=c(2000,2),freq=52)
+ts.plot(res.fit.gam.dif,ylab="Residual Process")
+
+acf(rate.dif-gam_ts.dif, lag=52 * 6)
+```
+
+* Comment on the two models fit and on the appropriateness of the stationarity assumption of the residuals. Additionally, comment if models built with original or differenced data appear to differ in quality of fit; which (if any) is better?
+
+Both models work similarly and don't violate assumptions of stationary process. Clearly, differenced data works better than raw data. We could clearly see there is not trend and seasonality from ACF plots.
+
