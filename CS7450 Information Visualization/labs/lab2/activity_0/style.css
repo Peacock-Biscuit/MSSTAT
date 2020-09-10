@@ -1,0 +1,29 @@
+
+circle {
+    fill: #4672c1;
+    stroke: #fff;
+    stroke-width: 0.5;
+    opacity: 0.7;
+}
+
+text.country-name {
+    text-anchor: middle;
+    font-size: 10px;
+    fill: #333;
+}
+
+
+body {
+    font-family: "Open Sans";
+}
+
+#main {
+    margin: 10px 20px;
+}
+
+text.label {
+    text-anchor: middle;
+    font-size: 14px;
+    fill: #555;
+    font-family: sans-serif;
+}
