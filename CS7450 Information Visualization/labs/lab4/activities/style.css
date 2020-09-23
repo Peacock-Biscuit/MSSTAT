@@ -1,0 +1,36 @@
+.line-plot {
+    fill: none;
+    stroke-width: 1.5px;
+    stroke: #333;
+}
+
+.company-label {
+    text-anchor: middle;
+    font-size: 20px;
+    font-weight: semibold;
+    opacity: 0.8;
+}
+
+.axis-label {
+    text-anchor: middle;
+    font-size: 12px;
+    font-weight: semibold;
+}
+
+.grid path,
+.grid line {
+    stroke: #fff;
+}
+
+.background {
+    fill: #eee;
+}
+
+body {
+    font-family: "Open Sans";
+    margin: 0;
+}
+
+#main {
+    margin: 20px;
+}
