@@ -1,0 +1,10 @@
+circle {
+    fill: gray;
+}
+
+text {
+    text-anchor: middle;
+    font-size: 11px;
+    fill: gray;
+    font-family: Arial;
+}
