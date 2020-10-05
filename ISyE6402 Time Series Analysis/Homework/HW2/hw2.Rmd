@@ -1,0 +1,553 @@
+---
+title: "ISyE6402_HW2"
+author: "Jim Liu"
+date: "10/4/2020"
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Question 1: Forecasting Music Charts (30 Pts)
+
+```{r, include=FALSE}
+#Load chart_monthly.csv
+library(TSA)
+library(mgcv)
+data <- read.csv("/Users/jim/Dropbox (GaTech)/Courses/ISyE6402/Homework/HW2/chart_monthly.csv")
+data <- data[,2]
+chart = ts(data,start=c(1965,1),freq=12)
+chart.dif = diff(chart)
+```
+
+Above is a dataset containing the number of unique songs to enter the billboard top 40 charts each month between 1965 and 2018 (every full year the charts have existed). We will be use these charts to build forecasting models to estimate how many new songs will chart in the future.
+
+---
+
+### 1a. Exploratory Analysis
+
+(i) Plot the Time Series and ACF plots. Comment on the main features, and identify what (if any) assumptions of stationarity are violated.
+
+```{r Song Time Series Plot}
+ts.plot(chart, ylab="No. of Songs")
+```
+
+```{r Songs ACF Plots}
+acf(chart, lag.max = 12 * 12, cex=0.3)
+```
+
+Comment:
+
+From the time series plot and ACF plot, we could clearly see there is a decreasing trend and some seasonality is still remaining in the data. Therefore, it may violate contant mean and auto-covariance may not be independent of time. In the ACF plot, all spikes within lag=12 are all outside siginificant bands. And in the time series plot, from the beginning year to 2020, decreasing trend is here and there is a big spike around 1999.
+
+---
+
+(ii) Perform a differencing on the data, and perform the same analysis. How do assumptions of stationarity hold for the differenced data? Do you expect the differencing data be suitable for ARMA forecasting?
+
+```{r differenced data}
+ts.plot(chart.dif, ylab="Differenced Songs")
+```
+
+
+```{r dif data acf}
+acf(chart.dif, lag.max = 12 * 12, cex=0.3)
+```
+
+Comment:
+
+(1) How do assumptions of stationarity hold for the differenced data?
+From the time series plot, the assumption of constant mean and contant variance hold, although there is one spike in the plot. But other than that, it shows constant mean and variance.
+
+(2) Do you expect the differencing data be suitable for ARMA forecasting?
+No. From the ACF plot, we could see most spikes are outside siginificant bands. ARMA models requires the stationary assumption. Therefore, the ARMA model on differenced data is not suitable for this dataset.
+
+---
+
+### 1b. ARIMA Modelling
+
+Using graphical analysis of ACF and PACF plots as well as the iterative approach, fit the an ARIMA(p,d,q) model with max order = 3, max differencing = 1. Using an AIC significance threshold of 2, choose which order to use and explain your reasoning for choosing it.  Evaluate the model residuals with relevant plots and tests.
+
+```{r Diff Songs ACF}
+acf((chart),main="ACF: Songs", lag.max = 12*20)
+```
+
+
+```{r PACF Songs}
+pacf((chart),main="PACF: Songs", lag.max = 12*12)
+```
+
+From the ACF and PACF plots, the assumption of constant mean is violated through seeing the ACF plot. In the ACF plot, when $q=18$, it seems that all spikes are within significant bands. And, the PACF plots seems to give us the $p$ value in AR(p) process. I decide to choose $p=8$ and $q=18$ to fit the ARMA(p, q) model. 
+
+```{r ARMR(8, 18), warning=FALSE}
+mod.ACFPACF = arima(chart, order=c(8,0,18), method="ML")
+AIC(mod.ACFPACF)
+```
+
+The AIC for ARMA(8, 18) is 3640.973.
+
+```{r ARMA(8, 18) plots and residual}
+par(mfrow=c(2,2))
+plot(resid(mod.ACFPACF), ylab='Residuals',type='o',main="Residual Plot")
+abline(h=0)
+acf(resid(mod.ACFPACF),main="ACF: Residuals", lag.max = 10 * 12)
+hist(resid(mod.ACFPACF),xlab='Residuals',main='Histogram: Residuals')
+qqnorm(resid(mod.ACFPACF),ylab="Sample Q",xlab="Theoretical Q")
+qqline(resid(mod.ACFPACF))
+```
+
+```{r}
+pacf(resid(mod.ACFPACF),main="ACF: Residuals", lag.max = 10 * 12)
+```
+
+```{r ARIMA(8, 0, 18) Testing}
+Box.test(mod.ACFPACF$resid, lag = (3+1+3), type = "Box-Pierce", fitdf = (3+3))
+Box.test(mod.ACFPACF$resid, lag = (3+1+3), type = "Ljung-Box", fitdf = (3+3))
+```
+
+```{r Helper Function for iterative approach, include=FALSE}
+n = length(chart)
+test_modelA <- function(p,d,q){
+mod = arima(chart, order=c(p,d,q), method="ML")
+current.aic = AIC(mod)
+df = data.frame(p,d,q,current.aic)
+names(df) <- c("p","d","q","AIC")
+print(paste(p,d,q,current.aic,sep=" "))
+return(df)
+}
+
+orders = data.frame(Inf,Inf,Inf,Inf)
+names(orders) <- c("p","d","q","AIC")
+
+
+for (p in 0:3){
+  for (d in 0:1){
+    for (q in 0:3) {
+      possibleError <- tryCatch(
+        orders<-rbind(orders,test_modelA(p,d,q)),
+        error=function(e) e
+      )
+      if(inherits(possibleError, "error")) next
+
+    }
+  }
+}
+```
+
+Following values are the AIC selection process to determine which order I chose.
+
+```{r Chart AIC Selection}
+orders <- orders[order(-orders$AIC),]
+tail(orders)
+```
+
+
+```{r, include=FALSE}
+final_model = arima(chart, order = c(3,1,3), method = "ML")
+```
+
+
+```{r plots and residual}
+par(mfrow=c(2,2))
+plot(resid(final_model), ylab='Residuals',type='o',main="Residual Plot")
+abline(h=0)
+acf(resid(final_model),main="ACF: Residuals", lag.max = 10 * 12)
+hist(resid(final_model),xlab='Residuals',main='Histogram: Residuals')
+qqnorm(resid(final_model),ylab="Sample Q",xlab="Theoretical Q")
+qqline(resid(final_model))
+```
+
+```{r}
+pacf(resid(final_model),main="ACF: Residuals", lag.max = 10 * 12)
+```
+
+
+```{r ARIMA(3, 1, 3) Testing}
+Box.test(final_model$resid, lag = (3+1+3), type = "Box-Pierce", fitdf = (3+3))
+Box.test(final_model$resid, lag = (3+1+3), type = "Ljung-Box", fitdf = (3+3))
+```
+
+(1) Choose which order to use and explain your reasoning for choosing it
+
+From the graphical analysis, I used ACF and PACF to determine $p$ and $q$. Although the plots shows small difference from iterative approach, AIC statistics($\approx 3640$) from the ACF and PACF is higher than one ($\approx 3612$)from the iterative approach. Therefore, in this assignment, I chose less complex model ARIMA(3, 1, 3), instead of ARMA(8, 18).
+
+(2) Evaluate the model residuals with relevant plots and tests.
+
+From the two plots, there is small difference from two models. 
+
+In the ACF plots, ARMA(8, 18) seems to have fewer spikes outside the siginificant bands than ARIMA(3, 1, 3). 
+
+For the residual plots, two models shows the same big spike. The histograms from two models shows nearly the same shape of frquency. 
+
+As for Normal Q-Q plots, ARMA(8, 18) have more points lying on the straight line.
+For the PACF plots on residuals, ARMA(8, 18) shows that after lag=8, most spikes are within the significance band. And, ARIMA(3, 1, 3) also shows that after lag=8, most spikes are within the band.
+
+For independence tests, Box-Pierce test and Box-Ljung test, ARMA(8, 18) have higher p-values ($\approx0.652$) than one ($\approx0.20$) from ARIMA(3, 1, 3). It means that the residuals from ARMA(8, 18) are possibly correlated because p-values are greater than values from $90\%$ confindence intervals. On the contrary, p-values from ARIMA(3, 1, 3) are around 0.20, less than ARMA(8, 18). However, from the two models, residuals are most likely correlated because of higher p-values.
+
+---
+
+### 1c. Forecasting
+
+Build an ARIMA(2,1,4) model. Display model coefficients, comment on anything that stands out about them, and write out the model formula in full form. Then, keep the last 6 data points for testing. Generate forecasts of those 6 months and compare the predicted values to the actual ones. Include 95% confidence interval for the forecasts and provide plots. Calculate Mean Absolute Prediction Error (MAE), Mean Absolute Percentage Error (MAPE), and Precision Measure (PM); comment on the accuracy of predictions.
+
+```{r ARIMA(2, 1, 4), warning=FALSE}
+final_model_1c = arima(chart, order = c(2,1,4), method = "ML")
+final_model_1c
+```
+```{r ARIMA(2, 1, 4) TEST}
+library(lmtest)
+coeftest(final_model_1c)
+```
+
+(1) Display model coefficients, comment on anything that stands out about them, and write out the model formula in full form
+There are six coefficients. Two of them are for the AR process and the other are for the MA process. The full form of this model is $X_t=-1.15X_{t-1}-0.99X_{t-2}+0.09Z_{t-1}-0.09Z_{t-2}-0.88Z_{t-3}-0.16Z_{t-4}+Z_{t},\ where Z_{t}\sim WN(0, \sigma^2=15.06)$ From this model, I found we have smaller AIC value compared to previos ones. And, I also performed testing to check coeeficients and found all coefficients are significant.
+
+
+```{r Parse Dates, include=FALSE}
+library(zoo)
+yearmon = as.yearmon(time(chart))
+```
+
+(2) Keep the last 6 data points for testing. Generate forecasts of those 6 months and compare the predicted values to the actual ones. Include 95% confidence interval for the forecasts and provide plots
+
+```{r Prediction 6 datapoints, warning=FALSE, echo=FALSE}
+n = length(chart)
+nfit = n-6
+outprice = arima(chart[1:nfit], order = c(2,1,4),method = "ML")
+outpred = predict(outprice,n.ahead=6)
+ubound = outpred$pred+1.96*outpred$se
+lbound = outpred$pred-1.96*outpred$se
+ymin = min(lbound)
+ymax = max(ubound)
+plot(yearmon[(n-50):n],chart[(n-50):n],type="l", ylim=c(ymin,ymax), xlab="Time", ylab="Song", main="Songs Prediction")
+points(yearmon[(nfit+1):n],outpred$pred,col="red")
+lines(yearmon[(nfit+1):n],ubound,lty=3,lwd= 2, col="blue")
+lines(yearmon[(nfit+1):n],lbound,lty=3,lwd= 2, col="blue")
+```
+
+From the prediction plot, it seems that prediction a little catch the shapes of true values.
+
+(3) Calculate Mean Absolute Prediction Error (MAE), Mean Absolute Percentage Error (MAPE), and Precision Measure (PM); comment on the accuracy of predictions.
+
+```{r MAE, MAPE, PM}
+## Compute Accuracy Measures
+obssong = chart[(nfit+1):n] 
+predsong = outpred$pred
+### Mean Absolute Prediction Error (MAE)
+mean(abs(predsong-obssong))
+### Mean Absolute Percentage Error (MAPE)
+mean(abs(predsong-obssong)/obssong)
+### Precision Measure (PM)
+sum((predsong-obssong)^2)/sum((obssong-mean(obssong))^2)
+```
+
+MAE places emphasis on this is the mean signed difference. We could generally know that it ceters around the value,6.16. Actually, it is a little higher if we want to make prediction more accurate. 
+
+MAPE gives us a model evaluation, because of its very intuitive interpretation in terms of relative error. For the prediction situation, we hope we could get smaller MAPE because from the definition if two values are close, the percentage would be smaller. Therefore, we could only get around 0.5 accruacy.
+
+PM is also a similar indicator which use the sum of variance of observed values to show ratio between prediction and true values. If prediction is close to observed values, the value of PM would be close to 0. But, this value is not only close to 0 but also outside of 1. So it means most predictions are greater than one from the observed values to the mean. We know that the variance captures the spread of data. Therefore, if the values of PM is within 1, it shows that prediction is close to true values.
+
+---
+
+## Question 2: ARIMA Model Comparisons for Currency Conversion Rates (25 Pts)
+
+Using the USD to EURO conversion rate data that we already explored in Question 2 of Homework 1,  we will attempt to build a predictive model to forecast what rates will be like in the future. Additionally, we build a similar model for USD to GBP conversion rate data for the same time period, though we’ll be a bit reckless and skip proper exploratory data analysis this time.
+
+```{r Preprocessing, include=FALSE}
+#Libraries and Data
+library(TSA)
+library(mgcv)
+#USD to EU
+data1 <- read.csv("/Users/jim/Dropbox (GaTech)/Courses/ISyE6402/Homework/HW2/USD to EU.csv")
+data1 <- data1[,2]
+EU = ts(data1,start=c(2014),freq=52)
+#USD to GBP
+data2 <- read.csv("/Users/jim/Dropbox (GaTech)/Courses/ISyE6402/Homework/HW2/USD to GBP.csv")
+data2 <- data2[,2]
+GBP = ts(data2,start=c(2014),freq=52)
+```
+
+---
+
+### 2a. ARIMA Fitting
+
+For both time series, use the iterative model to fit an ARIMA(p,d,q) model with max order = 3, max differencing = 2. Evaluate the models for ACF and PACF plots as well as relevant tests.
+
+* EU 
+
+```{r EU Iterative Model, include=FALSE}
+n = length(chart)
+test_modelA <- function(p,d,q){
+mod = arima(EU, order=c(p,d,q), method="ML")
+current.aic = AIC(mod)
+df = data.frame(p,d,q,current.aic)
+names(df) <- c("p","d","q","AIC")
+print(paste(p,d,q,current.aic,sep=" "))
+return(df)
+}
+orders = data.frame(Inf,Inf,Inf,Inf)
+names(orders) <- c("p","d","q","AIC")
+
+for (p in 0:3){
+  for (d in 0:2){
+    for (q in 0:3) {
+      possibleError <- tryCatch(
+        orders<-rbind(orders,test_modelA(p,d,q)),
+        error=function(e) e
+      )
+      if(inherits(possibleError, "error")) next
+
+    }
+  }
+}
+```
+
+```{r EU AIC select}
+orders <- orders[order(-orders$AIC),]
+tail(orders)
+```
+
+```{r EU ARIMA(2, 1, 2), warning=FALSE}
+final_EU = arima(EU, order = c(2,1,2), method = "ML")
+resids.EU = resid(final_EU)
+## Residual Analysis
+par (mfrow=c(2,2))
+plot(resids.EU, ylab='Standardized Residuals', main="Residual Plot")
+abline(h=0)
+acf(resids.EU,main= 'ACF of the Model Residuals', lag.max = 52*4)
+pacf(resids.EU,main='PACF of the Model Residuals', lag.max = 52*4)
+qqnorm(resids.EU)
+qqline(resids.EU)
+```
+
+```{r}
+hist(resid(final_EU),xlab='Residuals',main='Histogram: Residuals')
+```
+
+
+```{r EU Tests}
+## Test for Independence for final model
+Box.test(resids.EU, lag = (2+2+1), type = "Box-Pierce", fitdf = (2+2))
+Box.test(resids.EU, lag = (2+2+1), type = "Ljung-Box", fitdf = (2+2))
+```
+
+(1) Evaluate the models for ACF and PACF plots as well as relevant tests.
+
+For AIC selection, ARIMA(2, 1, 2) has smaller AIC compared to the other. But, we should also make sure AIC threshhold (<2). So other candidates like ARIMA(3, 1, 3), ARIMA(2, 1, 3) and ARIMA(3, 1, 2) are also options. However, less parameters means simpler models. Therefore, the numbers of parameters for ARIMA(2, 1, 2) is smaller than others. Thus, ARIMA(2, 1, 2) is our final model.
+
+From the ACF plot, most spikes are within significant bands which means the assumptions of stationary process are not violated. 
+
+From the residual plot, we could also see constant variance. 
+
+For the PACF plot, in theory partial autocorrelations are equal to 0 beyond that point. So in this plot, it follows the theory and if we take expectation on the PACF plot, the value would be cloase to 0.
+
+As for the Normal Q-Q plot, we could clearly see that it follows the assumption of normality which means points are almost on the straight line.
+
+For residual independent tests, we could see that the p-values are around 0.23. So they indicates residuals are possibly correlated.
+
+* GBP
+
+```{r GBP Iterative Model, include=FALSE}
+n = length(GBP)
+test_modelA <- function(p,d,q){
+mod = arima(GBP, order=c(p,d,q), method="ML")
+current.aic = AIC(mod)
+df = data.frame(p,d,q,current.aic)
+names(df) <- c("p","d","q","AIC")
+print(paste(p,d,q,current.aic,sep=" "))
+return(df)
+}
+orders = data.frame(Inf,Inf,Inf,Inf)
+names(orders) <- c("p","d","q","AIC")
+
+for (p in 0:3){
+  for (d in 0:2){
+    for (q in 0:3) {
+      possibleError <- tryCatch(
+        orders<-rbind(orders,test_modelA(p,d,q)),
+        error=function(e) e
+      )
+      if(inherits(possibleError, "error")) next
+
+    }
+  }
+}
+```
+
+```{r GBP AIC selection}
+orders <- orders[order(-orders$AIC),]
+tail(orders)
+```
+
+
+```{r GBP ARIMA(0, 1, 1)}
+final_GBP = arima(EU, order = c(0,1,1), method = "ML")
+resids.GBP = resid(final_GBP)
+## Residual Analysis
+par (mfrow=c(2,2))
+plot(resids.GBP, ylab='Standardized Residuals', main="Residual Plot")
+abline(h=0)
+acf(resids.GBP,main= 'ACF of the Model Residuals', lag.max = 52*4)
+pacf(resids.GBP,main='PACF of the Model Residuals', lag.max = 52*4)
+qqnorm(resids.GBP)
+qqline(resids.GBP)
+```
+
+```{r}
+hist(resid(final_GBP),xlab='Residuals',main='Histogram: Residuals')
+```
+
+
+```{r GBP Tests}
+## Test for Independence for final model
+Box.test(resids.EU, lag = (0+1+1), type = "Box-Pierce", fitdf = (0+1))
+Box.test(resids.EU, lag = (0+1+1), type = "Ljung-Box", fitdf = (0+1))
+```
+
+For AIC selection, ARIMA(0, 1, 1) has little larger AIC compared than ARIMA(2, 1, 0). The AIC of ARIMA(2, 1, 0) is -1632.058. However, we set the AIC threshold as 2. So we need to consider other values as well. Other candidates are ARIMA(0, 1, 2), ARIMA(2, 0, 2), ARIMA(1, 1, 1) and ARIMA(0, 1, 3). However, less parameters means simpler models. Therefore, the numbers of parameters for ARIMA(0, 1, 1) is smaller than others. Thus, ARIMA(0, 1, 1) is our final model.
+
+From the residual plot, we could also see constant variance. 
+
+From the ACF plot, most spikes are within significant bands which means the assumptions of stationary process are not violated. But there is one spike which is outside the significance band.
+
+For the PACF plot, some of spikes are outside the significance bands.
+
+From the residual plot, we could also see constant variance. 
+
+As for the Normal Q-Q plot, we could clearly see that it follows the assumption of normality which means points are almost on the straight line.
+
+For histograms of residual, they do not totally follow normal shapes.
+
+For residual independent tests, we could see that the p-values are around 0.886. So they strongly indicates residuals are possibly correlated.
+
+
+---
+
+### 2b. Forecasting 
+
+Show coefficients for both models and compare significance of coefficients. 
+Next, for each series keep the last 12 data points for testing. Generate forecasts of those 12 weeks and compare the predicted values to the actual ones. Include 95% confidence interval for the forecasts and provide plots. 
+Calculate Mean Absolute Percentage Error (MAPE) and Precision Measure (PM) for each; compare the models. 
+
+(1) Show coefficients for both models and compare significance of coefficients. 
+
+```{r EU coefficients and significance }
+library(lmtest)
+coeftest(final_EU)
+```
+
+```{r GBP coefficients and siginificance}
+library(lmtest)
+coeftest(final_GBP)
+```
+
+For EU arima model, we could see all coeeficient are significant. However, GBP arima model is  90\% significant compared to EU model which is more significant.
+
+(2) For each series keep the last 12 data points for testing. Generate forecasts of those 12 weeks and compare the predicted values to the actual ones. Include 95% confidence interval for the forecasts and provide plots. 
+
+```{r GET weeks, include=FALSE}
+weeks = seq(from = as.Date("2014-01-01"), to = as.Date("2019-07-03"), by = 7)
+```
+
+
+```{r EU forecasts, echo=FALSE}
+n = length(EU)
+nfit = n-12
+outprice.EU = arima(EU[1:nfit], order = c(2,1,2),method = "ML")
+outpred.EU = predict(outprice.EU,n.ahead=12)
+ubound.EU = outpred.EU$pred+1.96*outpred.EU$se
+lbound.EU = outpred.EU$pred-1.96*outpred.EU$se
+ymin = min(lbound.EU)
+ymax = max(ubound.EU)
+plot(weeks[(n-50):n],EU[(n-50):n],type="l", ylim=c(ymin,ymax), xlab="Time", ylab="Rate", main="EU Forecasting")
+points(weeks[(nfit+1):n],outpred.EU$pred,col="red")
+lines(weeks[(nfit+1):n],ubound.EU,lty=3,lwd= 2, col="blue")
+lines(weeks[(nfit+1):n],lbound.EU,lty=3,lwd= 2, col="blue")
+```
+
+```{r GBP forecasts, echo=FALSE}
+n = length(GBP)
+nfit = n-12
+outprice.GBP = arima(GBP[1:nfit], order = c(2,1,2),method = "ML")
+outpred.GBP = predict(outprice.GBP,n.ahead=12)
+ubound.GBP = outpred.GBP$pred+1.96*outpred.GBP$se
+lbound.GBP = outpred.GBP$pred-1.96*outpred.GBP$se
+ymin = min(lbound.GBP)
+ymax = max(ubound.GBP)
+plot(weeks[(n-50):n],GBP[(n-50):n],type="l", ylim=c(ymin,ymax), xlab="Time", ylab="Rate", main="GBP Forecasting")
+points(weeks[(nfit+1):n],outpred.GBP$pred,col="red")
+lines(weeks[(nfit+1):n],ubound.GBP,lty=3,lwd= 2, col="blue")
+lines(weeks[(nfit+1):n],lbound.GBP,lty=3,lwd= 2, col="blue")
+```
+
+From the prediction plots, the EU prediction captures better shapes of observed values than GBP.
+
+From GBP prediction, it is almost a straight line which is not ideal.
+
+
+(3) Calculate Mean Absolute Percentage Error (MAPE) and Precision Measure (PM) for each; compare the models. 
+
+```{r EU MAPE PM}
+## Compute Accuracy Measures
+obsEU = EU[(nfit+1):n] 
+predEU = outpred.EU$pred
+### Mean Absolute Percentage Error (MAPE)
+mean(abs(predEU-obsEU)/obsEU)
+### Precision Measure (PM)
+sum((predEU-obsEU)^2)/sum((obsEU-mean(obsEU))^2)
+```
+
+```{r GBP MAPE PM}
+## Compute Accuracy Measures
+obsGBP = GBP[(nfit+1):n] 
+predGBP = outpred.GBP$pred
+### Mean Absolute Percentage Error (MAPE)
+mean(abs(predGBP-obsGBP)/obsGBP)
+### Precision Measure (PM)
+sum((predGBP-obsGBP)^2)/sum((obsGBP-mean(obsGBP))^2)
+```
+
+From two MAPEs and PMs, we could see what EU model does is better than the GBP model. 
+
+For the prediction of MAPE, we hope we could get smaller MAPE because from the definition if two values are close, the percentage would be smaller. Therefore, the EU model has the value close to 0 but the MAPE of the GBP model is a little higher.
+
+In Precision Measure, if prediction is close to observed values, the value of PM would be within 1. However, both values from these two models are outside 1. But, the EU model is better than the GBP model. 
+
+---
+
+## Question 3: Reflection on ARIMA (5 Pts)
+
+Considering your understanding of the model as well as what you experiences completing the above questions, how would you personally regard the effectiveness of ARIMA modelling? 
+Where would it be appropriate to use for forecasting and where would you recommend against? 
+What are some specific points of caution one would need to consider when considering using it?
+
+Answer:
+
+(1) How would you personally regard the effectiveness of ARIMA modelling? 
+
+In my opinion, I think ARIMA is more effective when we need to consider more orders of difference of raw observations to make this time series plot stationary. If we just use MA, AR or ARMA models, sometimes we could not perfectly get stationary data. Therefore, ARIMA beats other models.
+
+(2) Where would it be appropriate to use for forecasting and where would you recommend against? 
+
+When it is appropriate,
+
+* Short term forecasting: From the above forecasting, we could see only short period works well.
+* Current data points rely on past data points. It is because the factor for chaging forecasting is simple. And, ARIMA could perform well.
+* Data is stationary: the assumptions for ARIMA is stationary.
+
+When I would not recommend, 
+
+* Scarce Data: If the d is higher, it means we need more time lags. If we only have small amouts of data. It is hard to use ARIMA.
+* Unstable: 
+* Long-time observation: ARIMA only perform well in short periods.
+
+(3) What are some specific points of caution one would need to consider when considering using it?
+
+* If the series has a strong and consistent seasonal pattern, then you should use an order of seasonal differencing.
+* It can be stationarized by a combination of differencing and other mathematical transformations such as logging
+* We have a substantial amount of data to work with: at least 4 full seasons in the case of seasonal data.
+
+
