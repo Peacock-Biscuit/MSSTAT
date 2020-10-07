@@ -1,0 +1,32 @@
+.dot circle {
+    fill: #2381b3;
+    opacity: 0.8;
+}
+
+.dot text {
+    text-anchor: middle;
+    font-size: 10px;
+    pointer-events: none;
+    fill: #555;
+}
+
+body {
+    font-family: "Open Sans";
+    margin: 0;
+}
+
+label {
+    font-size: 13px;
+}
+
+#main {
+    margin: 20px;
+}
+
+.dot text {
+    opacity: 0;
+}
+
+.dot:hover text {
+    opacity: 1;
+}
