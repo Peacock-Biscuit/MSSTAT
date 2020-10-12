@@ -1,0 +1,100 @@
+.axis,
+.frame {
+  shape-rendering: crispEdges;
+}
+
+.axis line {
+  stroke: #ddd;
+}
+
+.axis path {
+  display: none;
+}
+
+.axis .axis-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-anchor: middle;
+  fill: #555;
+}
+
+.frame {
+  fill: none;
+  stroke: #aaa;
+}
+
+circle {
+  fill-opacity: .7;
+}
+
+circle.hidden {
+  fill: #ccc !important;
+  fill-opacity: .2;
+}
+
+circle:hover {
+  fill: #111 !important;
+  fill-opacity: 1;
+}
+
+.d3-tip {
+  line-height: 1;
+  padding: 6px;
+  background: rgba(240, 240, 240, 0.95);
+  color: #333;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+/* Creates a small triangle extender for the tooltip */
+.d3-tip:after {
+  box-sizing: border-box;
+  display: inline;
+  font-size: 10px;
+  width: 100%;
+  line-height: 1;
+  color: rgba(240, 240, 240, 0.95);
+  content: "\25BC";
+  position: absolute;
+  text-align: center;
+}
+
+/* Style northward tooltips specifically */
+.d3-tip.n:after {
+  margin: -2px 0 0 0;
+  top: 100%;
+  left: 0;
+}
+
+.d3-tip h5{
+  font-size: 13px;
+  font-weight: 600;
+  margin: 2px 10px 4px 2px;
+}
+
+.d3-tip thead td {
+  border-bottom: 1px solid #ccc;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.d3-tip td {
+  padding: 2px 10px 2px 2px;
+}
+
+.d3-tip thead tr {
+  paddin-top: 10px;
+}
+
+body {
+    font-family: "Open Sans";
+    margin: 0;
+}
+
+label {
+    font-size: 13px;
+}
+
+#main {
+    margin: 20px;
+}
