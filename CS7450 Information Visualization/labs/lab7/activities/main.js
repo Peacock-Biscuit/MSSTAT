@@ -1,3 +1,12 @@
+// Global function called when select element is changed
+function onCategoryChanged() {
+    var select = d3.select('#colorAttrSelector').node();
+    // Get current value of select element
+    var category = select.options[select.selectedIndex].value;
+    // Update chart with the selected category of letters
+    updateChart(category);
+}
+
 var svg = d3.select('svg');
 
 var toolTip = d3.tip()
@@ -227,6 +236,26 @@ d3.csv('cars.csv', dataPreprocessor).then(function(dataset) {
         }
     }
 
+function updateChart(filter) {
+    // **** Draw and Update your chart here ****
+    console.log(filter);
+    var colorScale = d3.scaleSequential(d3.interpolateBlues)
+                        .domain(d3.extent(cars, function(d) { 
+                                                            return +d[filter];
+                                                            }));
+    if (filter == "cylinders" || filter == "year") {
+        var colorScale = d3.scaleOrdinal(d3.schemeCategory10);
+        var dots = d3.selectAll(".dot")
+                    .style("fill", function(d) {return colorScale(+d[filter]);});
+    } else {
+        var colorScale = d3.scaleSequential(d3.interpolateBlues)
+                    .domain(d3.extent(cars, function(d) { 
+                                                        return +d[filter];
+                                                        }));
+        var dots = d3.selectAll(".dot")
+                        .style("fill", function(d) {return colorScale(+d[filter]);});
+    }
+}
 // Remember code outside of the data callback function will run before the data loads
 
 function dataPreprocessor(row) {
@@ -241,3 +270,5 @@ function dataPreprocessor(row) {
         'year': +row['year']
     };
 }
+
+
