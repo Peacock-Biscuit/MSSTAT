@@ -1,0 +1,17 @@
+label.btn.btn-secondary,
+label.btn.btn-secondary:focus,
+label.btn.btn-secondary:active,
+label.btn.btn-secondary.active,
+label.btn.btn-secondary.active:focus,
+label.btn.btn-secondary.active:active {
+    box-shadow: none !important;
+}
+
+body {
+    font-family: "Open Sans";
+    margin: 0;
+}
+
+#main {
+    margin: 20px;
+}

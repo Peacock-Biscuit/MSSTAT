@@ -1,0 +1,38 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Lab 8b - Power Grid</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.2.0/dist/leaflet.css" />
+    <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+    <div id="main">
+    	<div class="btn-group btn-group-sm" data-toggle="buttons">
+    		<label class="btn btn-secondary"  data-type="cleared">
+        		<input type="checkbox" name="options" autocomplete="off">Cleared
+    		</label>
+    		<label class="btn btn-secondary active" data-type="nodes_links">
+        		<input type="checkbox" name="options" autocomplete="off" checked>Nodes/Links
+    		</label>
+    		<label class="btn btn-secondary"  data-type="states">
+    			<input type="checkbox" name="options" autocomplete="off">States
+			</label>
+			<label class="btn btn-secondary"  data-type="triangle_bins">
+    			<input type="checkbox" name="options" autocomplete="off"> Triangle Bins
+			</label>
+		</div>
+        <div id="map" style="height: 640px; width: 680px; border: 1px solid #777;"></div>
+    </div>
+</body>
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
+<script src="http://d3js.org/d3.v5.min.js"></script>
+<script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+<script src="https://unpkg.com/leaflet@1.2.0/dist/leaflet.js"></script>
+<script src='https://npmcdn.com/@turf/turf/turf.min.js'></script>
+<script src="./d3-tip.js"></script>
+<script src="./main.js"></script>
+</html>
