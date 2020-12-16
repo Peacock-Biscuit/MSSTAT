@@ -1,0 +1,1466 @@
+\documentclass[11pt]{article}
+
+    \usepackage[breakable]{tcolorbox}
+    \usepackage{parskip} % Stop auto-indenting (to mimic markdown behaviour)
+    
+    \usepackage{iftex}
+    \ifPDFTeX
+    	\usepackage[T1]{fontenc}
+    	\usepackage{mathpazo}
+    \else
+    	\usepackage{fontspec}
+    \fi
+
+    % Basic figure setup, for now with no caption control since it's done
+    % automatically by Pandoc (which extracts ![](path) syntax from Markdown).
+    \usepackage{graphicx}
+    % Maintain compatibility with old templates. Remove in nbconvert 6.0
+    \let\Oldincludegraphics\includegraphics
+    % Ensure that by default, figures have no caption (until we provide a
+    % proper Figure object with a Caption API and a way to capture that
+    % in the conversion process - todo).
+    \usepackage{caption}
+    \DeclareCaptionFormat{nocaption}{}
+    \captionsetup{format=nocaption,aboveskip=0pt,belowskip=0pt}
+
+    \usepackage[Export]{adjustbox} % Used to constrain images to a maximum size
+    \adjustboxset{max size={0.9\linewidth}{0.9\paperheight}}
+    \usepackage{float}
+    \floatplacement{figure}{H} % forces figures to be placed at the correct location
+    \usepackage{xcolor} % Allow colors to be defined
+    \usepackage{enumerate} % Needed for markdown enumerations to work
+    \usepackage{geometry} % Used to adjust the document margins
+    \usepackage{amsmath} % Equations
+    \usepackage{amssymb} % Equations
+    \usepackage{textcomp} % defines textquotesingle
+    % Hack from http://tex.stackexchange.com/a/47451/13684:
+    \AtBeginDocument{%
+        \def\PYZsq{\textquotesingle}% Upright quotes in Pygmentized code
+    }
+    \usepackage{upquote} % Upright quotes for verbatim code
+    \usepackage{eurosym} % defines \euro
+    \usepackage[mathletters]{ucs} % Extended unicode (utf-8) support
+    \usepackage{fancyvrb} % verbatim replacement that allows latex
+    \usepackage{grffile} % extends the file name processing of package graphics 
+                         % to support a larger range
+    \makeatletter % fix for grffile with XeLaTeX
+    \def\Gread@@xetex#1{%
+      \IfFileExists{"\Gin@base".bb}%
+      {\Gread@eps{\Gin@base.bb}}%
+      {\Gread@@xetex@aux#1}%
+    }
+    \makeatother
+
+    % The hyperref package gives us a pdf with properly built
+    % internal navigation ('pdf bookmarks' for the table of contents,
+    % internal cross-reference links, web links for URLs, etc.)
+    \usepackage{hyperref}
+    % The default LaTeX title has an obnoxious amount of whitespace. By default,
+    % titling removes some of it. It also provides customization options.
+    \usepackage{titling}
+    \usepackage{longtable} % longtable support required by pandoc >1.10
+    \usepackage{booktabs}  % table support for pandoc > 1.12.2
+    \usepackage[inline]{enumitem} % IRkernel/repr support (it uses the enumerate* environment)
+    \usepackage[normalem]{ulem} % ulem is needed to support strikethroughs (\sout)
+                                % normalem makes italics be italics, not underlines
+    \usepackage{mathrsfs}
+    
+
+    
+    % Colors for the hyperref package
+    \definecolor{urlcolor}{rgb}{0,.145,.698}
+    \definecolor{linkcolor}{rgb}{.71,0.21,0.01}
+    \definecolor{citecolor}{rgb}{.12,.54,.11}
+
+    % ANSI colors
+    \definecolor{ansi-black}{HTML}{3E424D}
+    \definecolor{ansi-black-intense}{HTML}{282C36}
+    \definecolor{ansi-red}{HTML}{E75C58}
+    \definecolor{ansi-red-intense}{HTML}{B22B31}
+    \definecolor{ansi-green}{HTML}{00A250}
+    \definecolor{ansi-green-intense}{HTML}{007427}
+    \definecolor{ansi-yellow}{HTML}{DDB62B}
+    \definecolor{ansi-yellow-intense}{HTML}{B27D12}
+    \definecolor{ansi-blue}{HTML}{208FFB}
+    \definecolor{ansi-blue-intense}{HTML}{0065CA}
+    \definecolor{ansi-magenta}{HTML}{D160C4}
+    \definecolor{ansi-magenta-intense}{HTML}{A03196}
+    \definecolor{ansi-cyan}{HTML}{60C6C8}
+    \definecolor{ansi-cyan-intense}{HTML}{258F8F}
+    \definecolor{ansi-white}{HTML}{C5C1B4}
+    \definecolor{ansi-white-intense}{HTML}{A1A6B2}
+    \definecolor{ansi-default-inverse-fg}{HTML}{FFFFFF}
+    \definecolor{ansi-default-inverse-bg}{HTML}{000000}
+
+    % commands and environments needed by pandoc snippets
+    % extracted from the output of `pandoc -s`
+    \providecommand{\tightlist}{%
+      \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+    \DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+    % Add ',fontsize=\small' for more characters per line
+    \newenvironment{Shaded}{}{}
+    \newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{\textbf{{#1}}}}
+    \newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.56,0.13,0.00}{{#1}}}
+    \newcommand{\DecValTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{{#1}}}
+    \newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{{#1}}}
+    \newcommand{\FloatTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{{#1}}}
+    \newcommand{\CharTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{{#1}}}
+    \newcommand{\StringTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{{#1}}}
+    \newcommand{\CommentTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textit{{#1}}}}
+    \newcommand{\OtherTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{{#1}}}
+    \newcommand{\AlertTok}[1]{\textcolor[rgb]{1.00,0.00,0.00}{\textbf{{#1}}}}
+    \newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.02,0.16,0.49}{{#1}}}
+    \newcommand{\RegionMarkerTok}[1]{{#1}}
+    \newcommand{\ErrorTok}[1]{\textcolor[rgb]{1.00,0.00,0.00}{\textbf{{#1}}}}
+    \newcommand{\NormalTok}[1]{{#1}}
+    
+    % Additional commands for more recent versions of Pandoc
+    \newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.53,0.00,0.00}{{#1}}}
+    \newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{{#1}}}
+    \newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{{#1}}}
+    \newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.73,0.40,0.53}{{#1}}}
+    \newcommand{\ImportTok}[1]{{#1}}
+    \newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.73,0.13,0.13}{\textit{{#1}}}}
+    \newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{{#1}}}}}
+    \newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{{#1}}}}}
+    \newcommand{\VariableTok}[1]{\textcolor[rgb]{0.10,0.09,0.49}{{#1}}}
+    \newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{\textbf{{#1}}}}
+    \newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.40,0.40,0.40}{{#1}}}
+    \newcommand{\BuiltInTok}[1]{{#1}}
+    \newcommand{\ExtensionTok}[1]{{#1}}
+    \newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.74,0.48,0.00}{{#1}}}
+    \newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.49,0.56,0.16}{{#1}}}
+    \newcommand{\InformationTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{{#1}}}}}
+    \newcommand{\WarningTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{{#1}}}}}
+    
+    
+    % Define a nice break command that doesn't care if a line doesn't already
+    % exist.
+    \def\br{\hspace*{\fill} \\* }
+    % Math Jax compatibility definitions
+    \def\gt{>}
+    \def\lt{<}
+    \let\Oldtex\TeX
+    \let\Oldlatex\LaTeX
+    \renewcommand{\TeX}{\textrm{\Oldtex}}
+    \renewcommand{\LaTeX}{\textrm{\Oldlatex}}
+    % Document parameters
+    % Document title
+    \title{ISyE6420\_final}
+    
+    
+    
+    
+    
+% Pygments definitions
+\makeatletter
+\def\PY@reset{\let\PY@it=\relax \let\PY@bf=\relax%
+    \let\PY@ul=\relax \let\PY@tc=\relax%
+    \let\PY@bc=\relax \let\PY@ff=\relax}
+\def\PY@tok#1{\csname PY@tok@#1\endcsname}
+\def\PY@toks#1+{\ifx\relax#1\empty\else%
+    \PY@tok{#1}\expandafter\PY@toks\fi}
+\def\PY@do#1{\PY@bc{\PY@tc{\PY@ul{%
+    \PY@it{\PY@bf{\PY@ff{#1}}}}}}}
+\def\PY#1#2{\PY@reset\PY@toks#1+\relax+\PY@do{#2}}
+
+\expandafter\def\csname PY@tok@w\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.73,0.73}{##1}}}
+\expandafter\def\csname PY@tok@c\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.25,0.50,0.50}{##1}}}
+\expandafter\def\csname PY@tok@cp\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.74,0.48,0.00}{##1}}}
+\expandafter\def\csname PY@tok@k\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@kp\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@kt\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.69,0.00,0.25}{##1}}}
+\expandafter\def\csname PY@tok@o\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@ow\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.67,0.13,1.00}{##1}}}
+\expandafter\def\csname PY@tok@nb\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@nf\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.00,1.00}{##1}}}
+\expandafter\def\csname PY@tok@nc\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.00,1.00}{##1}}}
+\expandafter\def\csname PY@tok@nn\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.00,1.00}{##1}}}
+\expandafter\def\csname PY@tok@ne\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.82,0.25,0.23}{##1}}}
+\expandafter\def\csname PY@tok@nv\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.10,0.09,0.49}{##1}}}
+\expandafter\def\csname PY@tok@no\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.53,0.00,0.00}{##1}}}
+\expandafter\def\csname PY@tok@nl\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.63,0.63,0.00}{##1}}}
+\expandafter\def\csname PY@tok@ni\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.60,0.60,0.60}{##1}}}
+\expandafter\def\csname PY@tok@na\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.49,0.56,0.16}{##1}}}
+\expandafter\def\csname PY@tok@nt\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@nd\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.67,0.13,1.00}{##1}}}
+\expandafter\def\csname PY@tok@s\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@sd\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@si\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.73,0.40,0.53}{##1}}}
+\expandafter\def\csname PY@tok@se\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.73,0.40,0.13}{##1}}}
+\expandafter\def\csname PY@tok@sr\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.40,0.53}{##1}}}
+\expandafter\def\csname PY@tok@ss\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.10,0.09,0.49}{##1}}}
+\expandafter\def\csname PY@tok@sx\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@m\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@gh\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.00,0.50}{##1}}}
+\expandafter\def\csname PY@tok@gu\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.50,0.00,0.50}{##1}}}
+\expandafter\def\csname PY@tok@gd\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.63,0.00,0.00}{##1}}}
+\expandafter\def\csname PY@tok@gi\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.63,0.00}{##1}}}
+\expandafter\def\csname PY@tok@gr\endcsname{\def\PY@tc##1{\textcolor[rgb]{1.00,0.00,0.00}{##1}}}
+\expandafter\def\csname PY@tok@ge\endcsname{\let\PY@it=\textit}
+\expandafter\def\csname PY@tok@gs\endcsname{\let\PY@bf=\textbf}
+\expandafter\def\csname PY@tok@gp\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.00,0.50}{##1}}}
+\expandafter\def\csname PY@tok@go\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.53,0.53,0.53}{##1}}}
+\expandafter\def\csname PY@tok@gt\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.27,0.87}{##1}}}
+\expandafter\def\csname PY@tok@err\endcsname{\def\PY@bc##1{\setlength{\fboxsep}{0pt}\fcolorbox[rgb]{1.00,0.00,0.00}{1,1,1}{\strut ##1}}}
+\expandafter\def\csname PY@tok@kc\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@kd\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@kn\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@kr\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@bp\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@fm\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.00,1.00}{##1}}}
+\expandafter\def\csname PY@tok@vc\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.10,0.09,0.49}{##1}}}
+\expandafter\def\csname PY@tok@vg\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.10,0.09,0.49}{##1}}}
+\expandafter\def\csname PY@tok@vi\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.10,0.09,0.49}{##1}}}
+\expandafter\def\csname PY@tok@vm\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.10,0.09,0.49}{##1}}}
+\expandafter\def\csname PY@tok@sa\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@sb\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@sc\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@dl\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@s2\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@sh\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@s1\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@mb\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@mf\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@mh\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@mi\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@il\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@mo\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@ch\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.25,0.50,0.50}{##1}}}
+\expandafter\def\csname PY@tok@cm\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.25,0.50,0.50}{##1}}}
+\expandafter\def\csname PY@tok@cpf\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.25,0.50,0.50}{##1}}}
+\expandafter\def\csname PY@tok@c1\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.25,0.50,0.50}{##1}}}
+\expandafter\def\csname PY@tok@cs\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.25,0.50,0.50}{##1}}}
+
+\def\PYZbs{\char`\\}
+\def\PYZus{\char`\_}
+\def\PYZob{\char`\{}
+\def\PYZcb{\char`\}}
+\def\PYZca{\char`\^}
+\def\PYZam{\char`\&}
+\def\PYZlt{\char`\<}
+\def\PYZgt{\char`\>}
+\def\PYZsh{\char`\#}
+\def\PYZpc{\char`\%}
+\def\PYZdl{\char`\$}
+\def\PYZhy{\char`\-}
+\def\PYZsq{\char`\'}
+\def\PYZdq{\char`\"}
+\def\PYZti{\char`\~}
+% for compatibility with earlier versions
+\def\PYZat{@}
+\def\PYZlb{[}
+\def\PYZrb{]}
+\makeatother
+
+
+    % For linebreaks inside Verbatim environment from package fancyvrb. 
+    \makeatletter
+        \newbox\Wrappedcontinuationbox 
+        \newbox\Wrappedvisiblespacebox 
+        \newcommand*\Wrappedvisiblespace {\textcolor{red}{\textvisiblespace}} 
+        \newcommand*\Wrappedcontinuationsymbol {\textcolor{red}{\llap{\tiny$\m@th\hookrightarrow$}}} 
+        \newcommand*\Wrappedcontinuationindent {3ex } 
+        \newcommand*\Wrappedafterbreak {\kern\Wrappedcontinuationindent\copy\Wrappedcontinuationbox} 
+        % Take advantage of the already applied Pygments mark-up to insert 
+        % potential linebreaks for TeX processing. 
+        %        {, <, #, %, $, ' and ": go to next line. 
+        %        _, }, ^, &, >, - and ~: stay at end of broken line. 
+        % Use of \textquotesingle for straight quote. 
+        \newcommand*\Wrappedbreaksatspecials {% 
+            \def\PYGZus{\discretionary{\char`\_}{\Wrappedafterbreak}{\char`\_}}% 
+            \def\PYGZob{\discretionary{}{\Wrappedafterbreak\char`\{}{\char`\{}}% 
+            \def\PYGZcb{\discretionary{\char`\}}{\Wrappedafterbreak}{\char`\}}}% 
+            \def\PYGZca{\discretionary{\char`\^}{\Wrappedafterbreak}{\char`\^}}% 
+            \def\PYGZam{\discretionary{\char`\&}{\Wrappedafterbreak}{\char`\&}}% 
+            \def\PYGZlt{\discretionary{}{\Wrappedafterbreak\char`\<}{\char`\<}}% 
+            \def\PYGZgt{\discretionary{\char`\>}{\Wrappedafterbreak}{\char`\>}}% 
+            \def\PYGZsh{\discretionary{}{\Wrappedafterbreak\char`\#}{\char`\#}}% 
+            \def\PYGZpc{\discretionary{}{\Wrappedafterbreak\char`\%}{\char`\%}}% 
+            \def\PYGZdl{\discretionary{}{\Wrappedafterbreak\char`\$}{\char`\$}}% 
+            \def\PYGZhy{\discretionary{\char`\-}{\Wrappedafterbreak}{\char`\-}}% 
+            \def\PYGZsq{\discretionary{}{\Wrappedafterbreak\textquotesingle}{\textquotesingle}}% 
+            \def\PYGZdq{\discretionary{}{\Wrappedafterbreak\char`\"}{\char`\"}}% 
+            \def\PYGZti{\discretionary{\char`\~}{\Wrappedafterbreak}{\char`\~}}% 
+        } 
+        % Some characters . , ; ? ! / are not pygmentized. 
+        % This macro makes them "active" and they will insert potential linebreaks 
+        \newcommand*\Wrappedbreaksatpunct {% 
+            \lccode`\~`\.\lowercase{\def~}{\discretionary{\hbox{\char`\.}}{\Wrappedafterbreak}{\hbox{\char`\.}}}% 
+            \lccode`\~`\,\lowercase{\def~}{\discretionary{\hbox{\char`\,}}{\Wrappedafterbreak}{\hbox{\char`\,}}}% 
+            \lccode`\~`\;\lowercase{\def~}{\discretionary{\hbox{\char`\;}}{\Wrappedafterbreak}{\hbox{\char`\;}}}% 
+            \lccode`\~`\:\lowercase{\def~}{\discretionary{\hbox{\char`\:}}{\Wrappedafterbreak}{\hbox{\char`\:}}}% 
+            \lccode`\~`\?\lowercase{\def~}{\discretionary{\hbox{\char`\?}}{\Wrappedafterbreak}{\hbox{\char`\?}}}% 
+            \lccode`\~`\!\lowercase{\def~}{\discretionary{\hbox{\char`\!}}{\Wrappedafterbreak}{\hbox{\char`\!}}}% 
+            \lccode`\~`\/\lowercase{\def~}{\discretionary{\hbox{\char`\/}}{\Wrappedafterbreak}{\hbox{\char`\/}}}% 
+            \catcode`\.\active
+            \catcode`\,\active 
+            \catcode`\;\active
+            \catcode`\:\active
+            \catcode`\?\active
+            \catcode`\!\active
+            \catcode`\/\active 
+            \lccode`\~`\~ 	
+        }
+    \makeatother
+
+    \let\OriginalVerbatim=\Verbatim
+    \makeatletter
+    \renewcommand{\Verbatim}[1][1]{%
+        %\parskip\z@skip
+        \sbox\Wrappedcontinuationbox {\Wrappedcontinuationsymbol}%
+        \sbox\Wrappedvisiblespacebox {\FV@SetupFont\Wrappedvisiblespace}%
+        \def\FancyVerbFormatLine ##1{\hsize\linewidth
+            \vtop{\raggedright\hyphenpenalty\z@\exhyphenpenalty\z@
+                \doublehyphendemerits\z@\finalhyphendemerits\z@
+                \strut ##1\strut}%
+        }%
+        % If the linebreak is at a space, the latter will be displayed as visible
+        % space at end of first line, and a continuation symbol starts next line.
+        % Stretch/shrink are however usually zero for typewriter font.
+        \def\FV@Space {%
+            \nobreak\hskip\z@ plus\fontdimen3\font minus\fontdimen4\font
+            \discretionary{\copy\Wrappedvisiblespacebox}{\Wrappedafterbreak}
+            {\kern\fontdimen2\font}%
+        }%
+        
+        % Allow breaks at special characters using \PYG... macros.
+        \Wrappedbreaksatspecials
+        % Breaks at punctuation characters . , ; ? ! and / need catcode=\active 	
+        \OriginalVerbatim[#1,codes*=\Wrappedbreaksatpunct]%
+    }
+    \makeatother
+
+    % Exact colors from NB
+    \definecolor{incolor}{HTML}{303F9F}
+    \definecolor{outcolor}{HTML}{D84315}
+    \definecolor{cellborder}{HTML}{CFCFCF}
+    \definecolor{cellbackground}{HTML}{F7F7F7}
+    
+    % prompt
+    \makeatletter
+    \newcommand{\boxspacing}{\kern\kvtcb@left@rule\kern\kvtcb@boxsep}
+    \makeatother
+    \newcommand{\prompt}[4]{
+        \ttfamily\llap{{\color{#2}[#3]:\hspace{3pt}#4}}\vspace{-\baselineskip}
+    }
+    
+
+    
+    % Prevent overflowing lines due to hard-to-break entities
+    \sloppy 
+    % Setup hyperref package
+    \hypersetup{
+      breaklinks=true,  % so long urls are correctly broken across lines
+      colorlinks=true,
+      urlcolor=urlcolor,
+      linkcolor=linkcolor,
+      citecolor=citecolor,
+      }
+    % Slightly bigger margins than the latex defaults
+    
+    \geometry{verbose,tmargin=1in,bmargin=1in,lmargin=1in,rmargin=1in}
+    
+    
+
+\begin{document}
+    
+    \maketitle
+    
+    
+
+    
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{1}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{k+kn}{import} \PY{n+nn}{numpy} \PY{k}{as} \PY{n+nn}{np}
+\PY{k+kn}{import} \PY{n+nn}{pandas} \PY{k}{as} \PY{n+nn}{pd}
+\PY{k+kn}{import} \PY{n+nn}{matplotlib}\PY{n+nn}{.}\PY{n+nn}{pyplot} \PY{k}{as} \PY{n+nn}{plt}
+\PY{k+kn}{import} \PY{n+nn}{seaborn} \PY{k}{as} \PY{n+nn}{sns}
+\PY{o}{\PYZpc{}}\PY{k}{matplotlib} inline
+\end{Verbatim}
+\end{tcolorbox}
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{2}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{k+kn}{import} \PY{n+nn}{arviz} \PY{k}{as} \PY{n+nn}{az}
+\PY{k+kn}{import} \PY{n+nn}{pymc3} \PY{k}{as} \PY{n+nn}{pm}
+\end{Verbatim}
+\end{tcolorbox}
+
+    \hypertarget{vasoconstriction}{%
+\section{Vasoconstriction}\label{vasoconstriction}}
+
+The data give the presence or absence (\(y_i\) = 1 or 0) of
+vasoconstric- tion in the skin of the fingers following inhalation of a
+certain volume of air (\(v_i\)) at a certain average rate (\(r_i\)).
+Total number of records is 39. The candidate models for analyzing the
+relationship are the usual logit, probit, cloglog, loglog, and cauchyit
+models.
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{3}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{y\PYZus{}1} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{array}\PY{p}{(}\PY{p}{[}\PY{l+m+mi}{1}\PY{p}{,}\PY{l+m+mi}{1}\PY{p}{,}\PY{l+m+mi}{1}\PY{p}{,}\PY{l+m+mi}{1}\PY{p}{,}\PY{l+m+mi}{1}\PY{p}{,}\PY{l+m+mi}{1}\PY{p}{,}\PY{l+m+mi}{0}\PY{p}{,}\PY{l+m+mi}{0}\PY{p}{,}\PY{l+m+mi}{0}\PY{p}{,}\PY{l+m+mi}{0}\PY{p}{,}\PY{l+m+mi}{0}\PY{p}{,}\PY{l+m+mi}{0}\PY{p}{,}\PY{l+m+mi}{0}\PY{p}{,}\PY{l+m+mi}{1}\PY{p}{,}\PY{l+m+mi}{1}\PY{p}{,}\PY{l+m+mi}{1}\PY{p}{,}\PY{l+m+mi}{1}\PY{p}{,}\PY{l+m+mi}{1}\PY{p}{,}
+   \PY{l+m+mi}{0}\PY{p}{,}\PY{l+m+mi}{1}\PY{p}{,}\PY{l+m+mi}{0}\PY{p}{,}\PY{l+m+mi}{0}\PY{p}{,}\PY{l+m+mi}{0}\PY{p}{,}\PY{l+m+mi}{0}\PY{p}{,}\PY{l+m+mi}{1}\PY{p}{,}\PY{l+m+mi}{0}\PY{p}{,}\PY{l+m+mi}{1}\PY{p}{,}\PY{l+m+mi}{0}\PY{p}{,}\PY{l+m+mi}{1}\PY{p}{,}\PY{l+m+mi}{0}\PY{p}{,}\PY{l+m+mi}{1}\PY{p}{,}\PY{l+m+mi}{0}\PY{p}{,}\PY{l+m+mi}{0}\PY{p}{,}\PY{l+m+mi}{1}\PY{p}{,}\PY{l+m+mi}{1}\PY{p}{,}\PY{l+m+mi}{1}\PY{p}{,}\PY{l+m+mi}{0}\PY{p}{,}\PY{l+m+mi}{0}\PY{p}{,}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{)}
+\PY{n}{v\PYZus{}1} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{array}\PY{p}{(}\PY{p}{[}\PY{l+m+mf}{3.7}\PY{p}{,} \PY{l+m+mf}{3.5}\PY{p}{,} \PY{l+m+mf}{1.25}\PY{p}{,} \PY{l+m+mf}{0.75}\PY{p}{,} \PY{l+m+mf}{0.8}\PY{p}{,} \PY{l+m+mf}{0.7}\PY{p}{,} \PY{l+m+mf}{0.6}\PY{p}{,} \PY{l+m+mf}{1.1}\PY{p}{,} \PY{l+m+mf}{0.9}\PY{p}{,} \PY{l+m+mf}{0.9}\PY{p}{,} \PY{l+m+mf}{0.8}\PY{p}{,} \PY{l+m+mf}{0.55}\PY{p}{,} \PY{l+m+mf}{0.6}\PY{p}{,} \PY{l+m+mf}{1.4}\PY{p}{,} \PY{l+m+mf}{0.75}\PY{p}{,} \PY{l+m+mf}{2.3}\PY{p}{,} \PY{l+m+mf}{3.2}\PY{p}{,} \PY{l+m+mf}{0.85}\PY{p}{,} \PY{l+m+mf}{1.7}\PY{p}{,}
+                \PY{l+m+mf}{1.8}\PY{p}{,} \PY{l+m+mf}{0.4}\PY{p}{,} \PY{l+m+mf}{0.95}\PY{p}{,} \PY{l+m+mf}{1.35}\PY{p}{,} \PY{l+m+mf}{1.5}\PY{p}{,} \PY{l+m+mf}{1.6}\PY{p}{,} \PY{l+m+mf}{0.6}\PY{p}{,} \PY{l+m+mf}{1.8}\PY{p}{,} \PY{l+m+mf}{0.95}\PY{p}{,} \PY{l+m+mf}{1.9}\PY{p}{,} \PY{l+m+mf}{1.6}\PY{p}{,} \PY{l+m+mf}{2.7}\PY{p}{,} \PY{l+m+mf}{2.35}\PY{p}{,} \PY{l+m+mf}{1.1}\PY{p}{,} \PY{l+m+mf}{1.1}\PY{p}{,} \PY{l+m+mf}{1.2}\PY{p}{,} \PY{l+m+mf}{0.8}\PY{p}{,} \PY{l+m+mf}{0.95}\PY{p}{,} \PY{l+m+mf}{0.75}\PY{p}{,} \PY{l+m+mf}{1.3}\PY{p}{]}\PY{p}{)}
+\PY{n}{r\PYZus{}1} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{array}\PY{p}{(}\PY{p}{[}\PY{l+m+mf}{0.825}\PY{p}{,} \PY{l+m+mf}{1.09}\PY{p}{,} \PY{l+m+mf}{2.5}\PY{p}{,} \PY{l+m+mf}{1.5}\PY{p}{,} \PY{l+m+mf}{3.2}\PY{p}{,} \PY{l+m+mf}{3.5}\PY{p}{,} \PY{l+m+mf}{0.75}\PY{p}{,} \PY{l+m+mf}{1.7}\PY{p}{,} \PY{l+m+mf}{0.75}\PY{p}{,} \PY{l+m+mf}{0.45}\PY{p}{,} \PY{l+m+mf}{0.57}\PY{p}{,} \PY{l+m+mf}{2.75}\PY{p}{,} \PY{l+m+mi}{3}\PY{p}{,} \PY{l+m+mf}{2.33}\PY{p}{,} \PY{l+m+mf}{3.75}\PY{p}{,} \PY{l+m+mf}{1.64}\PY{p}{,} \PY{l+m+mf}{1.6}\PY{p}{,} \PY{l+m+mf}{1.415}\PY{p}{,}
+\PY{l+m+mf}{1.06}\PY{p}{,} \PY{l+m+mf}{1.8}\PY{p}{,} \PY{l+m+mi}{2}\PY{p}{,} \PY{l+m+mf}{1.36}\PY{p}{,} \PY{l+m+mf}{1.35}\PY{p}{,} \PY{l+m+mf}{1.36}\PY{p}{,} \PY{l+m+mf}{1.78}\PY{p}{,} \PY{l+m+mf}{1.5}\PY{p}{,} \PY{l+m+mf}{1.5}\PY{p}{,} \PY{l+m+mf}{1.9}\PY{p}{,} \PY{l+m+mf}{0.95}\PY{p}{,} \PY{l+m+mf}{0.4}\PY{p}{,} \PY{l+m+mf}{0.75}\PY{p}{,} \PY{l+m+mf}{0.3}\PY{p}{,} \PY{l+m+mf}{1.83}\PY{p}{,} \PY{l+m+mf}{2.2}\PY{p}{,} \PY{l+m+mi}{2}\PY{p}{,} \PY{l+m+mf}{3.33}\PY{p}{,} \PY{l+m+mf}{1.9}\PY{p}{,} \PY{l+m+mf}{1.9}\PY{p}{,} \PY{l+m+mf}{1.625}\PY{p}{]}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
+
+    \hypertarget{a-transform-covariates-v-and-r-as-x_1-log10v-x_2-log10r.}{%
+\subsection{\texorpdfstring{(a) Transform covariates \(v\) and \(r\) as
+\(x_1\) = log(10×\(v\)), \(x_2\) =
+log(10×\(r\)).}{(a) Transform covariates v and r as x\_1 = log(10×v), x\_2 = log(10×r).}}\label{a-transform-covariates-v-and-r-as-x_1-log10v-x_2-log10r.}}
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{4}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{x\PYZus{}1} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{log}\PY{p}{(}\PY{l+m+mi}{10} \PY{o}{*} \PY{n}{v\PYZus{}1}\PY{p}{)}
+\PY{n}{x\PYZus{}1}
+\end{Verbatim}
+\end{tcolorbox}
+
+            \begin{tcolorbox}[breakable, size=fbox, boxrule=.5pt, pad at break*=1mm, opacityfill=0]
+\prompt{Out}{outcolor}{4}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+array([3.61091791, 3.55534806, 2.52572864, 2.01490302, 2.07944154,
+       1.94591015, 1.79175947, 2.39789527, 2.19722458, 2.19722458,
+       2.07944154, 1.70474809, 1.79175947, 2.63905733, 2.01490302,
+       3.13549422, 3.4657359 , 2.14006616, 2.83321334, 2.89037176,
+       1.38629436, 2.2512918 , 2.60268969, 2.7080502 , 2.77258872,
+       1.79175947, 2.89037176, 2.2512918 , 2.94443898, 2.77258872,
+       3.29583687, 3.15700042, 2.39789527, 2.39789527, 2.48490665,
+       2.07944154, 2.2512918 , 2.01490302, 2.56494936])
+\end{Verbatim}
+\end{tcolorbox}
+        
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{5}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{x\PYZus{}2} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{log}\PY{p}{(}\PY{l+m+mi}{10} \PY{o}{*} \PY{n}{r\PYZus{}1}\PY{p}{)}
+\PY{n}{x\PYZus{}2}
+\end{Verbatim}
+\end{tcolorbox}
+
+            \begin{tcolorbox}[breakable, size=fbox, boxrule=.5pt, pad at break*=1mm, opacityfill=0]
+\prompt{Out}{outcolor}{5}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+array([2.1102132 , 2.38876279, 3.21887582, 2.7080502 , 3.4657359 ,
+       3.55534806, 2.01490302, 2.83321334, 2.01490302, 1.5040774 ,
+       1.74046617, 3.314186  , 3.40119738, 3.14845336, 3.62434093,
+       2.79728133, 2.77258872, 2.64971462, 2.360854  , 2.89037176,
+       2.99573227, 2.61006979, 2.60268969, 2.61006979, 2.87919846,
+       2.7080502 , 2.7080502 , 2.94443898, 2.2512918 , 1.38629436,
+       2.01490302, 1.09861229, 2.90690106, 3.09104245, 2.99573227,
+       3.5055574 , 2.94443898, 2.94443898, 2.78809291])
+\end{Verbatim}
+\end{tcolorbox}
+        
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{6}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{df} \PY{o}{=} \PY{n}{pd}\PY{o}{.}\PY{n}{DataFrame}\PY{p}{(}\PY{p}{\PYZob{}}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{vasoconstriction}\PY{l+s+s2}{\PYZdq{}}\PY{p}{:} \PY{n}{y\PYZus{}1}\PY{p}{,} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{air\PYZus{}log}\PY{l+s+s2}{\PYZdq{}}\PY{p}{:} \PY{n}{x\PYZus{}1}\PY{p}{,} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{rate\PYZus{}log}\PY{l+s+s2}{\PYZdq{}}\PY{p}{:} \PY{n}{x\PYZus{}2}\PY{p}{\PYZcb{}}\PY{p}{)}
+\PY{n}{df}\PY{o}{.}\PY{n}{head}\PY{p}{(}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
+
+            \begin{tcolorbox}[breakable, size=fbox, boxrule=.5pt, pad at break*=1mm, opacityfill=0]
+\prompt{Out}{outcolor}{6}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+   vasoconstriction   air\_log  rate\_log
+0                 1  3.610918  2.110213
+1                 1  3.555348  2.388763
+2                 1  2.525729  3.218876
+3                 1  2.014903  2.708050
+4                 1  2.079442  3.465736
+\end{Verbatim}
+\end{tcolorbox}
+        
+    \hypertarget{b-estimate-posterior-means-for-coefficients-in-the-logit-model.-use-noninformative-priors-on-all-coefficients.}{%
+\subsection{(b) Estimate posterior means for coefficients in the logit
+model. Use noninformative priors on all
+coefficients.}\label{b-estimate-posterior-means-for-coefficients-in-the-logit-model.-use-noninformative-priors-on-all-coefficients.}}
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{7}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{names} \PY{o}{=} \PY{n}{df}\PY{o}{.}\PY{n}{index}\PY{o}{.}\PY{n}{values}
+\PY{n}{N} \PY{o}{=} \PY{n+nb}{len}\PY{p}{(}\PY{n}{names}\PY{p}{)}
+\PY{n}{dims}\PY{o}{=}\PY{p}{\PYZob{}}
+    \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{air\PYZus{}log}\PY{l+s+s2}{\PYZdq{}}\PY{p}{:} \PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{developer}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}\PY{p}{,}
+    \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{rate\PYZus{}log}\PY{l+s+s2}{\PYZdq{}}\PY{p}{:} \PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{developer}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}
+\PY{p}{\PYZcb{}}
+\end{Verbatim}
+\end{tcolorbox}
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{8}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{l+s+sd}{\PYZsq{}\PYZsq{}\PYZsq{} }
+\PY{l+s+sd}{pymc3 priors are }
+\PY{l+s+sd}{default\PYZus{}regressor\PYZus{}prior = Normal.dist(mu=0, tau=1.0E\PYZhy{}6) and}
+\PY{l+s+sd}{default\PYZus{}intercept\PYZus{}prior = Flat.dist()}
+\PY{l+s+sd}{\PYZsq{}\PYZsq{}\PYZsq{}}
+\PY{k}{with} \PY{n}{pm}\PY{o}{.}\PY{n}{Model}\PY{p}{(}\PY{p}{)} \PY{k}{as} \PY{n}{logistic\PYZus{}model}\PY{p}{:}
+    \PY{n}{pm}\PY{o}{.}\PY{n}{glm}\PY{o}{.}\PY{n}{linear}\PY{o}{.}\PY{n}{GLM}\PY{p}{(}\PY{n}{y}\PY{o}{=}\PY{n}{df}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{vasoconstriction}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}\PY{p}{,} \PY{n}{x}\PY{o}{=} \PY{n}{df}\PY{p}{[}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{air\PYZus{}log}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{rate\PYZus{}log}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}\PY{p}{]}\PY{p}{,} \PY{n}{intercept}\PY{o}{=}\PY{k+kc}{True}\PY{p}{,}
+                      \PY{n}{family}\PY{o}{=}\PY{n}{pm}\PY{o}{.}\PY{n}{glm}\PY{o}{.}\PY{n}{families}\PY{o}{.}\PY{n}{Binomial}\PY{p}{(}\PY{p}{)}\PY{p}{)}
+    \PY{n}{trace\PYZus{}log} \PY{o}{=} \PY{n}{pm}\PY{o}{.}\PY{n}{sample}\PY{p}{(}\PY{l+m+mi}{5000}\PY{p}{,} \PY{n}{tune}\PY{o}{=}\PY{l+m+mi}{5000}\PY{p}{,} \PY{n}{init}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{adapt\PYZus{}diag}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+    \PY{n}{posterior\PYZus{}predictive} \PY{o}{=} \PY{n}{pm}\PY{o}{.}\PY{n}{sample\PYZus{}posterior\PYZus{}predictive}\PY{p}{(}\PY{n}{trace\PYZus{}log}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+Auto-assigning NUTS sampler{\ldots}
+Initializing NUTS using adapt\_diag{\ldots}
+Multiprocess sampling (4 chains in 4 jobs)
+NUTS: [rate\_log, air\_log, Intercept]
+    \end{Verbatim}
+
+    
+    \begin{verbatim}
+<IPython.core.display.HTML object>
+    \end{verbatim}
+
+    
+    \begin{Verbatim}[commandchars=\\\{\}]
+Sampling 4 chains for 5\_000 tune and 5\_000 draw iterations (20\_000 + 20\_000
+draws total) took 54 seconds.
+There was 1 divergence after tuning. Increase `target\_accept` or reparameterize.
+There were 26 divergences after tuning. Increase `target\_accept` or
+reparameterize.
+The acceptance probability does not match the target. It is 0.6210488848956406,
+but should be close to 0.8. Try to increase the number of tuning steps.
+There were 2 divergences after tuning. Increase `target\_accept` or
+reparameterize.
+The acceptance probability does not match the target. It is 0.7165668834870483,
+but should be close to 0.8. Try to increase the number of tuning steps.
+The number of effective samples is smaller than 10\% for some parameters.
+    \end{Verbatim}
+
+    
+    \begin{verbatim}
+<IPython.core.display.HTML object>
+    \end{verbatim}
+
+    
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{9}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{az}\PY{o}{.}\PY{n}{summary}\PY{p}{(}\PY{n}{trace\PYZus{}log}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+/opt/anaconda3/lib/python3.7/site-packages/arviz/data/io\_pymc3.py:91:
+FutureWarning: Using `from\_pymc3` without the model will be deprecated in a
+future release. Not using the model will return less accurate and less useful
+results. Make sure you use the model argument or call from\_pymc3 within a model
+context.
+  FutureWarning,
+    \end{Verbatim}
+
+            \begin{tcolorbox}[breakable, size=fbox, boxrule=.5pt, pad at break*=1mm, opacityfill=0]
+\prompt{Out}{outcolor}{9}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+             mean      sd  hdi\_3\%  hdi\_97\%  mcse\_mean  mcse\_sd  ess\_mean  \textbackslash{}
+Intercept -30.883  10.584 -50.062  -12.367      0.408    0.289     672.0
+air\_log     6.269   2.174   2.536   10.256      0.084    0.059     671.0
+rate\_log    5.595   2.021   2.366    9.520      0.073    0.051     776.0
+
+           ess\_sd  ess\_bulk  ess\_tail  r\_hat
+Intercept   672.0     519.0     322.0   1.01
+air\_log     671.0     523.0     336.0   1.01
+rate\_log    776.0     630.0     789.0   1.01
+\end{Verbatim}
+\end{tcolorbox}
+        
+    The means of intercept, air\_log and rate\_log are -30.883, 6.269 and
+5.595, respectively.
+
+    \hypertarget{c-for-a-subject-with-v-r-1.5-find-the-probability-of-vasoconstriction.}{%
+\subsection{\texorpdfstring{(c) For a subject with \(v = r = 1.5\), find
+the probability of
+vasoconstriction.}{(c) For a subject with v = r = 1.5, find the probability of vasoconstriction.}}\label{c-for-a-subject-with-v-r-1.5-find-the-probability-of-vasoconstriction.}}
+
+    \$P(vasoconstriction=1) = p \$ =
+\(\frac{1}{ 1+e^(-(intercept + 6.461 \times air_log + 5.719 \times rate_log)) }\)
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{42}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{prob\PYZus{}v} \PY{o}{=} \PY{l+m+mi}{1}\PY{o}{/} \PY{p}{(}\PY{l+m+mi}{1} \PY{o}{+} \PY{n}{np}\PY{o}{.}\PY{n}{exp}\PY{p}{(}\PY{o}{\PYZhy{}}\PY{p}{(}\PY{o}{\PYZhy{}}\PY{l+m+mf}{30.883} \PY{o}{+} \PY{l+m+mf}{6.269} \PY{o}{*} \PY{n}{np}\PY{o}{.}\PY{n}{log}\PY{p}{(}\PY{l+m+mf}{1.5} \PY{o}{*} \PY{l+m+mi}{10}\PY{p}{)} \PY{o}{+} \PY{l+m+mf}{5.595} \PY{o}{*} \PY{n}{np}\PY{o}{.}\PY{n}{log}\PY{p}{(}\PY{l+m+mf}{1.5} \PY{o}{*} \PY{l+m+mi}{10}\PY{p}{)}\PY{p}{)}\PY{p}{)}\PY{p}{)}
+\PY{n+nb}{print}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{The probability of vasoconstriction with v = r = 1.5: }\PY{l+s+s2}{\PYZdq{}}\PY{p}{,} \PY{n}{prob\PYZus{}v}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+The probability of vasoconstriction with v = r = 1.5:  0.7764865250020363
+    \end{Verbatim}
+
+    \hypertarget{d-compare-with-the-result-of-probit-model.-which-has-smaller-deviance}{%
+\subsection{(d) Compare with the result of probit model. Which has
+smaller
+deviance?}\label{d-compare-with-the-result-of-probit-model.-which-has-smaller-deviance}}
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{11}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{k+kn}{import} \PY{n+nn}{theano}\PY{n+nn}{.}\PY{n+nn}{tensor} \PY{k}{as} \PY{n+nn}{tsr}
+\PY{k+kn}{from} \PY{n+nn}{collections} \PY{k+kn}{import} \PY{n}{OrderedDict}
+\end{Verbatim}
+\end{tcolorbox}
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{12}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{k}{with} \PY{n}{pm}\PY{o}{.}\PY{n}{Model}\PY{p}{(}\PY{p}{)} \PY{k}{as} \PY{n}{probit\PYZus{}model}\PY{p}{:}    
+    \PY{c+c1}{\PYZsh{} priors}
+    \PY{n}{intercept} \PY{o}{=} \PY{n}{pm}\PY{o}{.}\PY{n}{Flat}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{intercept}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+    \PY{n}{beta0} \PY{o}{=} \PY{n}{pm}\PY{o}{.}\PY{n}{Normal}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{beta0}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,} \PY{n}{mu}\PY{o}{=}\PY{l+m+mi}{0}\PY{p}{,} \PY{n}{tau}\PY{o}{=}\PY{l+m+mf}{1.0E\PYZhy{}6}\PY{p}{)}
+    \PY{n}{beta1} \PY{o}{=} \PY{n}{pm}\PY{o}{.}\PY{n}{Normal}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{beta1}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{mu}\PY{o}{=}\PY{l+m+mi}{0}\PY{p}{,} \PY{n}{tau}\PY{o}{=}\PY{l+m+mf}{1.0E\PYZhy{}6}\PY{p}{)}
+
+    \PY{c+c1}{\PYZsh{} linear predictor}
+    \PY{n}{theta\PYZus{}p} \PY{o}{=} \PY{n}{intercept} \PY{o}{+} \PY{n}{beta0} \PY{o}{*} \PY{n}{df}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{air\PYZus{}log}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]} \PY{o}{+} \PY{n}{beta1} \PY{o}{*} \PY{n}{df}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{rate\PYZus{}log}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}
+
+    \PY{c+c1}{\PYZsh{} Probit transform}
+    \PY{k}{def} \PY{n+nf}{probit\PYZus{}phi}\PY{p}{(}\PY{n}{x}\PY{p}{)}\PY{p}{:}
+        \PY{n}{mu} \PY{o}{=} \PY{l+m+mi}{0}
+        \PY{n}{sd} \PY{o}{=} \PY{l+m+mi}{1}
+        \PY{k}{return} \PY{l+m+mf}{0.5} \PY{o}{*} \PY{p}{(}\PY{l+m+mi}{1} \PY{o}{+} \PY{n}{tsr}\PY{o}{.}\PY{n}{erf}\PY{p}{(}\PY{p}{(}\PY{n}{x} \PY{o}{\PYZhy{}} \PY{n}{mu}\PY{p}{)} \PY{o}{/} \PY{p}{(}\PY{n}{sd} \PY{o}{*} \PY{n}{tsr}\PY{o}{.}\PY{n}{sqrt}\PY{p}{(}\PY{l+m+mi}{2}\PY{p}{)}\PY{p}{)}\PY{p}{)}\PY{p}{)}
+    
+    \PY{n}{theta} \PY{o}{=} \PY{n}{probit\PYZus{}phi}\PY{p}{(}\PY{n}{theta\PYZus{}p}\PY{p}{)}
+
+
+    \PY{c+c1}{\PYZsh{} likelihood}
+    \PY{n}{y} \PY{o}{=} \PY{n}{pm}\PY{o}{.}\PY{n}{Bernoulli}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{y}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{p}\PY{o}{=}\PY{n}{theta}\PY{p}{,} \PY{n}{observed}\PY{o}{=}\PY{n}{df}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{vasoconstriction}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}\PY{p}{)}
+    
+    \PY{n}{trace\PYZus{}prob} \PY{o}{=} \PY{n}{pm}\PY{o}{.}\PY{n}{sample}\PY{p}{(}\PY{l+m+mi}{5000}\PY{p}{,} \PY{n}{tune}\PY{o}{=}\PY{l+m+mi}{5000}\PY{p}{,} \PY{n}{init}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{adapt\PYZus{}diag}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+    \PY{n}{posterior\PYZus{}predictive\PYZus{}prob} \PY{o}{=} \PY{n}{pm}\PY{o}{.}\PY{n}{sample\PYZus{}posterior\PYZus{}predictive}\PY{p}{(}\PY{n}{trace\PYZus{}prob}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+Auto-assigning NUTS sampler{\ldots}
+Initializing NUTS using adapt\_diag{\ldots}
+ERROR (theano.gof.opt): Optimization failure due to: local\_grad\_log\_erfc\_neg
+ERROR (theano.gof.opt): node:
+Elemwise\{true\_div,no\_inplace\}(Elemwise\{mul,no\_inplace\}.0,
+Elemwise\{erfc,no\_inplace\}.0)
+ERROR (theano.gof.opt): TRACEBACK:
+ERROR (theano.gof.opt): Traceback (most recent call last):
+  File "/opt/anaconda3/lib/python3.7/site-packages/theano/gof/opt.py", line
+2034, in process\_node
+    replacements = lopt.transform(node)
+  File "/opt/anaconda3/lib/python3.7/site-packages/theano/tensor/opt.py", line
+6789, in local\_grad\_log\_erfc\_neg
+    if not exp.owner.inputs[0].owner:
+AttributeError: 'NoneType' object has no attribute 'owner'
+
+Multiprocess sampling (4 chains in 4 jobs)
+NUTS: [beta1, beta0, intercept]
+    \end{Verbatim}
+
+    
+    \begin{verbatim}
+<IPython.core.display.HTML object>
+    \end{verbatim}
+
+    
+    \begin{Verbatim}[commandchars=\\\{\}]
+Sampling 4 chains for 5\_000 tune and 5\_000 draw iterations (20\_000 + 20\_000
+draws total) took 55 seconds.
+There were 518 divergences after tuning. Increase `target\_accept` or
+reparameterize.
+The acceptance probability does not match the target. It is 0.6682940921512561,
+but should be close to 0.8. Try to increase the number of tuning steps.
+The acceptance probability does not match the target. It is 0.906901957639155,
+but should be close to 0.8. Try to increase the number of tuning steps.
+The number of effective samples is smaller than 10\% for some parameters.
+    \end{Verbatim}
+
+    
+    \begin{verbatim}
+<IPython.core.display.HTML object>
+    \end{verbatim}
+
+    
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{13}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{model\PYZus{}trace\PYZus{}dict} \PY{o}{=} \PY{p}{\PYZob{}}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{logistic\PYZus{}model}\PY{l+s+s2}{\PYZdq{}}\PY{p}{:}\PY{n}{trace\PYZus{}log}\PY{p}{,} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{probit\PYZus{}model}\PY{l+s+s2}{\PYZdq{}}\PY{p}{:} \PY{n}{trace\PYZus{}prob}\PY{p}{\PYZcb{}}
+\PY{n}{az}\PY{o}{.}\PY{n}{compare}\PY{p}{(}\PY{n}{model\PYZus{}trace\PYZus{}dict}\PY{p}{,} \PY{n}{ic}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{WAIC}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{scale}\PY{o}{=}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{deviance}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+/opt/anaconda3/lib/python3.7/site-packages/arviz/data/io\_pymc3.py:91:
+FutureWarning: Using `from\_pymc3` without the model will be deprecated in a
+future release. Not using the model will return less accurate and less useful
+results. Make sure you use the model argument or call from\_pymc3 within a model
+context.
+  FutureWarning,
+/opt/anaconda3/lib/python3.7/site-packages/arviz/stats/stats.py:1427:
+UserWarning: For one or more samples the posterior variance of the log
+predictive densities exceeds 0.4. This could be indication of WAIC starting to
+fail.
+See http://arxiv.org/abs/1507.04544 for details
+  "For one or more samples the posterior variance of the log predictive "
+/opt/anaconda3/lib/python3.7/site-packages/arviz/data/io\_pymc3.py:91:
+FutureWarning: Using `from\_pymc3` without the model will be deprecated in a
+future release. Not using the model will return less accurate and less useful
+results. Make sure you use the model argument or call from\_pymc3 within a model
+context.
+  FutureWarning,
+/opt/anaconda3/lib/python3.7/site-packages/arviz/stats/stats.py:1427:
+UserWarning: For one or more samples the posterior variance of the log
+predictive densities exceeds 0.4. This could be indication of WAIC starting to
+fail.
+See http://arxiv.org/abs/1507.04544 for details
+  "For one or more samples the posterior variance of the log predictive "
+    \end{Verbatim}
+
+            \begin{tcolorbox}[breakable, size=fbox, boxrule=.5pt, pad at break*=1mm, opacityfill=0]
+\prompt{Out}{outcolor}{13}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+               rank     waic   p\_waic   d\_waic    weight       se      dse  \textbackslash{}
+probit\_model      0   36.107  3.18883        0  0.601672  9.70566        0
+logistic\_model    1  37.1122   3.9323  1.00522  0.398328  8.57837  1.59664
+
+               warning waic\_scale
+probit\_model      True   deviance
+logistic\_model    True   deviance
+\end{Verbatim}
+\end{tcolorbox}
+        
+    Based on the above table, we could see the probit model has smaller
+deviance than the logistic model.
+
+    \hypertarget{magnesium-ammonium-phosphate-and-chrysanthemums}{%
+\section{Magnesium Ammonium Phosphate and
+Chrysanthemums}\label{magnesium-ammonium-phosphate-and-chrysanthemums}}
+
+Walpole et al.~(2007) provide data from a study on the effect of
+magnesium ammonium phosphate on the height of chrysanthemums, which was
+conducted at George Mason University in order to determine a possible
+optimum level of fertilization, based on the enhanced vertical growth
+response of the chrysanthemums. Forty chrysanthemum seedlings were
+assigned to 4 groups, each containing 10 plants. Each was planted in a
+similar pot containing a uniform growth medium. An increasing
+concentration of MgNH4PO4, measured in grams per bushel, was added to
+each plant. The 4 groups of plants were grown under uniform conditions
+in a greenhouse for a period of 4 weeks.
+
+The treatments and the respective changes in heights, measured in
+centimeters, are given in the following table:
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{14}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{g50} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{array}\PY{p}{(}\PY{p}{[}\PY{l+m+mf}{13.2}\PY{p}{,} \PY{l+m+mf}{12.4}\PY{p}{,} \PY{l+m+mf}{12.8}\PY{p}{,} \PY{l+m+mf}{17.2}\PY{p}{,} \PY{l+m+mf}{13.0}\PY{p}{,} \PY{l+m+mf}{14.0}\PY{p}{,} \PY{l+m+mf}{14.2}\PY{p}{,} \PY{l+m+mf}{21.6}\PY{p}{,} \PY{l+m+mf}{15.0}\PY{p}{,} \PY{l+m+mf}{20.0}\PY{p}{]}\PY{p}{)}
+\PY{n}{g100} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{array}\PY{p}{(}\PY{p}{[}\PY{l+m+mf}{16.0}\PY{p}{,} \PY{l+m+mf}{12.6}\PY{p}{,} \PY{l+m+mf}{14.8}\PY{p}{,} \PY{l+m+mf}{13.0}\PY{p}{,} \PY{l+m+mf}{14.0}\PY{p}{,} \PY{l+m+mf}{23.6}\PY{p}{,} \PY{l+m+mf}{14.0}\PY{p}{,} \PY{l+m+mf}{17.0}\PY{p}{,} \PY{l+m+mf}{22.2}\PY{p}{,} \PY{l+m+mf}{24.4}\PY{p}{]}\PY{p}{)}
+\PY{n}{g200} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{array}\PY{p}{(}\PY{p}{[}\PY{l+m+mf}{7.8}\PY{p}{,} \PY{l+m+mf}{14.4}\PY{p}{,} \PY{l+m+mf}{20.0}\PY{p}{,} \PY{l+m+mf}{15.8}\PY{p}{,} \PY{l+m+mf}{17.0}\PY{p}{,} \PY{l+m+mf}{27.0}\PY{p}{,} \PY{l+m+mf}{19.6}\PY{p}{,} \PY{l+m+mf}{18.0}\PY{p}{,} \PY{l+m+mf}{20.2}\PY{p}{,} \PY{l+m+mf}{23.2}\PY{p}{]}\PY{p}{)}
+\PY{n}{g400} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{array}\PY{p}{(}\PY{p}{[}\PY{l+m+mf}{21.0}\PY{p}{,} \PY{l+m+mf}{14.8}\PY{p}{,} \PY{l+m+mf}{19.1}\PY{p}{,} \PY{l+m+mf}{15.8}\PY{p}{,} \PY{l+m+mf}{18.0}\PY{p}{,} \PY{l+m+mf}{26.0}\PY{p}{,} \PY{l+m+mf}{21.1}\PY{p}{,} \PY{l+m+mf}{22.0}\PY{p}{,} \PY{l+m+mf}{25.0}\PY{p}{,} \PY{l+m+mf}{18.2}\PY{p}{]}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
+
+    Solve the problem as a Bayesian one-way ANOVA. Use STZ constraints on
+treatment effects.
+
+    \hypertarget{a-do-different-concentrations-of-mgnh4po4-affect-the-average-attained-height-of-chrysanthemums-look-at-the-95-credible-sets-for-the-differences-between-treatment-effects.}{%
+\subsection{(a) Do different concentrations of MgNH4PO4 affect the
+average attained height of chrysanthemums? Look at the 95\% credible
+sets for the differences between treatment
+effects.}\label{a-do-different-concentrations-of-mgnh4po4-affect-the-average-attained-height-of-chrysanthemums-look-at-the-95-credible-sets-for-the-differences-between-treatment-effects.}}
+
+    Explanation on choices of priors:
+
+In pymc3, if the priors are too non-informative, the sampling will fail
+because there are many zeros when the program takes derivatives.
+Therefore, we released the constraints and chose weakly informative
+priors on the mean, alpha2, alpha3 and alpha4.
+
+For sigma, the best scenario is using Inversegamma with alpha = 0.0001
+and beta = 0.0001. However, the same thing happened. So we released the
+constraints, too. We changed alpha and beta to 0.01 and 0.01,
+respectively.
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{15}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{k}{with} \PY{n}{pm}\PY{o}{.}\PY{n}{Model}\PY{p}{(}\PY{p}{)} \PY{k}{as} \PY{n}{ANOVA}\PY{p}{:}
+    \PY{n}{mu} \PY{o}{=} \PY{n}{pm}\PY{o}{.}\PY{n}{Normal}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{mu}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,} \PY{n}{mu}\PY{o}{=}\PY{l+m+mi}{0}\PY{p}{,} \PY{n}{sigma}\PY{o}{=}\PY{l+m+mi}{1}\PY{p}{)}
+    \PY{n}{sigma} \PY{o}{=} \PY{n}{pm}\PY{o}{.}\PY{n}{InverseGamma}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{sigma}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,} \PY{n}{alpha}\PY{o}{=}\PY{l+m+mf}{0.01}\PY{p}{,} \PY{n}{beta}\PY{o}{=}\PY{l+m+mf}{0.01}\PY{p}{)}
+    \PY{n}{alpha2} \PY{o}{=} \PY{n}{pm}\PY{o}{.}\PY{n}{Normal}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{alpha2}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,} \PY{n}{mu}\PY{o}{=}\PY{l+m+mi}{0}\PY{p}{,} \PY{n}{sigma}\PY{o}{=}\PY{l+m+mi}{1}\PY{p}{)}
+    \PY{n}{alpha3} \PY{o}{=} \PY{n}{pm}\PY{o}{.}\PY{n}{Normal}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{alpha3}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,} \PY{n}{mu}\PY{o}{=}\PY{l+m+mi}{0}\PY{p}{,} \PY{n}{sigma}\PY{o}{=}\PY{l+m+mi}{1}\PY{p}{)}
+    \PY{n}{alpha4} \PY{o}{=} \PY{n}{pm}\PY{o}{.}\PY{n}{Normal}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{alpha4}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,} \PY{n}{mu}\PY{o}{=}\PY{l+m+mi}{0}\PY{p}{,} \PY{n}{sigma}\PY{o}{=}\PY{l+m+mi}{1}\PY{p}{)}
+    \PY{c+c1}{\PYZsh{} STZ constraints}
+    \PY{n}{alpha1} \PY{o}{=} \PY{n}{pm}\PY{o}{.}\PY{n}{Deterministic}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{alpha1}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,} \PY{o}{\PYZhy{}}\PY{p}{(}\PY{n}{alpha2}\PY{o}{+}\PY{n}{alpha3}\PY{o}{+}\PY{n}{alpha4}\PY{p}{)}\PY{p}{)}
+    
+    \PY{c+c1}{\PYZsh{} likelihood}
+    \PY{n}{treatment\PYZus{}50} \PY{o}{=} \PY{n}{pm}\PY{o}{.}\PY{n}{Normal}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{g50}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,} \PY{n}{mu}\PY{o}{=}\PY{n}{mu}\PY{o}{+}\PY{n}{alpha1}\PY{p}{,} \PY{n}{sigma}\PY{o}{=}\PY{n}{sigma}\PY{p}{,} \PY{n}{observed}\PY{o}{=}\PY{n}{g50}\PY{p}{)}
+    \PY{n}{treatment\PYZus{}100} \PY{o}{=} \PY{n}{pm}\PY{o}{.}\PY{n}{Normal}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{g100}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,} \PY{n}{mu}\PY{o}{=}\PY{n}{mu}\PY{o}{+}\PY{n}{alpha2}\PY{p}{,} \PY{n}{sigma}\PY{o}{=}\PY{n}{sigma}\PY{p}{,} \PY{n}{observed}\PY{o}{=}\PY{n}{g100}\PY{p}{)}
+    \PY{n}{treatment\PYZus{}200} \PY{o}{=} \PY{n}{pm}\PY{o}{.}\PY{n}{Normal}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{g200}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,} \PY{n}{mu}\PY{o}{=}\PY{n}{mu}\PY{o}{+}\PY{n}{alpha3}\PY{p}{,} \PY{n}{sigma}\PY{o}{=}\PY{n}{sigma}\PY{p}{,} \PY{n}{observed}\PY{o}{=}\PY{n}{g200}\PY{p}{)}
+    \PY{n}{treatment\PYZus{}400} \PY{o}{=} \PY{n}{pm}\PY{o}{.}\PY{n}{Normal}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{g400}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,} \PY{n}{mu}\PY{o}{=}\PY{n}{mu}\PY{o}{+}\PY{n}{alpha4}\PY{p}{,} \PY{n}{sigma}\PY{o}{=}\PY{n}{sigma}\PY{p}{,} \PY{n}{observed}\PY{o}{=}\PY{n}{g400}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{16}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{k}{with} \PY{n}{ANOVA}\PY{p}{:}
+    \PY{n}{alpha1\PYZus{}diff\PYZus{}alpha2} \PY{o}{=} \PY{n}{pm}\PY{o}{.}\PY{n}{Deterministic}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{a1\PYZhy{}a2}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{alpha1} \PY{o}{\PYZhy{}} \PY{n}{alpha2}\PY{p}{)}
+    \PY{n}{alpha1\PYZus{}diff\PYZus{}alpha3} \PY{o}{=} \PY{n}{pm}\PY{o}{.}\PY{n}{Deterministic}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{a1\PYZhy{}a3}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{alpha1} \PY{o}{\PYZhy{}} \PY{n}{alpha3}\PY{p}{)}
+    \PY{n}{alpha1\PYZus{}diff\PYZus{}alpha4} \PY{o}{=} \PY{n}{pm}\PY{o}{.}\PY{n}{Deterministic}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{a1\PYZhy{}a4}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{alpha1} \PY{o}{\PYZhy{}} \PY{n}{alpha4}\PY{p}{)}
+    
+    \PY{n}{alpha2\PYZus{}diff\PYZus{}alpha3} \PY{o}{=} \PY{n}{pm}\PY{o}{.}\PY{n}{Deterministic}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{a2\PYZhy{}a3}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{alpha2} \PY{o}{\PYZhy{}} \PY{n}{alpha3}\PY{p}{)}
+    \PY{n}{alpha2\PYZus{}diff\PYZus{}alpha4} \PY{o}{=} \PY{n}{pm}\PY{o}{.}\PY{n}{Deterministic}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{a2\PYZhy{}a4}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{alpha2} \PY{o}{\PYZhy{}} \PY{n}{alpha4}\PY{p}{)}
+    \PY{n}{alpha3\PYZus{}diff\PYZus{}alpha4} \PY{o}{=} \PY{n}{pm}\PY{o}{.}\PY{n}{Deterministic}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{a3\PYZhy{}a4}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{alpha3} \PY{o}{\PYZhy{}} \PY{n}{alpha4}\PY{p}{)}    
+\end{Verbatim}
+\end{tcolorbox}
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{17}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{k}{with} \PY{n}{ANOVA}\PY{p}{:}
+    \PY{n}{trace\PYZus{}anova} \PY{o}{=} \PY{n}{pm}\PY{o}{.}\PY{n}{sample}\PY{p}{(}\PY{l+m+mi}{5000}\PY{p}{,} \PY{n}{tune}\PY{o}{=}\PY{l+m+mi}{5000}\PY{p}{,} \PY{n}{init}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{adapt\PYZus{}diag}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+Auto-assigning NUTS sampler{\ldots}
+Initializing NUTS using adapt\_diag{\ldots}
+Multiprocess sampling (4 chains in 4 jobs)
+NUTS: [alpha4, alpha3, alpha2, sigma, mu]
+    \end{Verbatim}
+
+    
+    \begin{verbatim}
+<IPython.core.display.HTML object>
+    \end{verbatim}
+
+    
+    \begin{Verbatim}[commandchars=\\\{\}]
+Sampling 4 chains for 5\_000 tune and 5\_000 draw iterations (20\_000 + 20\_000
+draws total) took 30 seconds.
+    \end{Verbatim}
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{18}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{az}\PY{o}{.}\PY{n}{summary}\PY{p}{(}\PY{n}{trace\PYZus{}anova}\PY{p}{,} \PY{n}{stat\PYZus{}funcs}\PY{o}{=}\PY{p}{\PYZob{}}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{hdi\PYZus{}2.5}\PY{l+s+s2}{\PYZpc{}}\PY{l+s+s2}{\PYZdq{}}\PY{p}{:} \PY{k}{lambda} \PY{n}{x}\PY{p}{:}\PY{n}{np}\PY{o}{.}\PY{n}{percentile}\PY{p}{(}\PY{n}{x}\PY{p}{,} \PY{l+m+mf}{2.5}\PY{p}{)}\PY{p}{,} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{hdi\PYZus{}97.5}\PY{l+s+s2}{\PYZpc{}}\PY{l+s+s2}{\PYZdq{}}\PY{p}{:} \PY{k}{lambda} \PY{n}{x} \PY{p}{:} \PY{n}{np}\PY{o}{.}\PY{n}{percentile}\PY{p}{(}\PY{n}{x}\PY{p}{,} \PY{l+m+mf}{97.5}\PY{p}{)}\PY{p}{\PYZcb{}}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+/opt/anaconda3/lib/python3.7/site-packages/arviz/data/io\_pymc3.py:91:
+FutureWarning: Using `from\_pymc3` without the model will be deprecated in a
+future release. Not using the model will return less accurate and less useful
+results. Make sure you use the model argument or call from\_pymc3 within a model
+context.
+  FutureWarning,
+    \end{Verbatim}
+
+            \begin{tcolorbox}[breakable, size=fbox, boxrule=.5pt, pad at break*=1mm, opacityfill=0]
+\prompt{Out}{outcolor}{18}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+          mean     sd  hdi\_3\%  hdi\_97\%  mcse\_mean  mcse\_sd  ess\_mean   ess\_sd  \textbackslash{}
+mu       2.427  1.085   0.378    4.434      0.008    0.006   17454.0  16639.0
+alpha2   0.057  0.972  -1.689    1.970      0.006    0.007   27958.0  10118.0
+alpha3   0.102  0.962  -1.654    1.953      0.006    0.007   27518.0  10682.0
+alpha4   0.158  0.964  -1.661    1.958      0.006    0.007   30313.0  10545.0
+sigma   16.241  2.138  12.448   20.348      0.016    0.012   17266.0  17266.0
+alpha1  -0.317  1.601  -3.270    2.760      0.009    0.011   30737.0  11046.0
+a1-a2   -0.374  2.285  -4.663    3.914      0.013    0.016   30231.0  10665.0
+a1-a3   -0.419  2.274  -4.599    3.991      0.013    0.015   29452.0  11092.0
+a1-a4   -0.475  2.287  -4.822    3.769      0.013    0.016   31153.0  10730.0
+a2-a3   -0.045  1.409  -2.618    2.672      0.009    0.010   26664.0  10495.0
+a2-a4   -0.101  1.393  -2.652    2.561      0.009    0.010   26810.0  10476.0
+a3-a4   -0.055  1.384  -2.607    2.570      0.008    0.010   28759.0  10374.0
+
+        ess\_bulk  ess\_tail  r\_hat  hdi\_2.5\%  hdi\_97.5\%
+mu       17461.0   14601.0    1.0     0.321      4.553
+alpha2   27981.0   15530.0    1.0    -1.856      1.959
+alpha3   27485.0   15232.0    1.0    -1.766      1.996
+alpha4   30314.0   15572.0    1.0    -1.760      2.033
+sigma    17022.0   14461.0    1.0    12.538     20.935
+alpha1   30758.0   15896.0    1.0    -3.440      2.841
+a1-a2    30239.0   15848.0    1.0    -4.849      4.110
+a1-a3    29465.0   15846.0    1.0    -4.925      4.059
+a1-a4    31199.0   15740.0    1.0    -4.911      4.056
+a2-a3    26658.0   15470.0    1.0    -2.813      2.714
+a2-a4    26801.0   15545.0    1.0    -2.809      2.621
+a3-a4    28798.0   15198.0    1.0    -2.734      2.654
+\end{Verbatim}
+\end{tcolorbox}
+        
+    Do different concentrations of MgNH4PO4 affect the average attained
+height of chrysanthemums?
+
+Based on the above table, we could see the differences between alphas.
+These differences all cover 0 which means different treatments more
+likely do not affect the average attained height of chrysanthemums.
+
+    \hypertarget{b-find-the-95-credible-set-for-the-contrast-ux3bc1-ux3bc2-ux3bc3-ux3bc4.}{%
+\subsection{(b) Find the 95\% credible set for the contrast μ1 − μ2 − μ3
++
+μ4.}\label{b-find-the-95-credible-set-for-the-contrast-ux3bc1-ux3bc2-ux3bc3-ux3bc4.}}
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{19}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{k}{with} \PY{n}{ANOVA}\PY{p}{:}
+    \PY{n}{mu\PYZus{}differences} \PY{o}{=} \PY{n}{pm}\PY{o}{.}\PY{n}{Deterministic}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{μ1−μ2−μ3+μ4}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,} \PY{p}{(}\PY{n}{mu}\PY{o}{+}\PY{n}{alpha1}\PY{p}{)} \PY{o}{\PYZhy{}} \PY{p}{(}\PY{n}{mu}\PY{o}{+}\PY{n}{alpha2}\PY{p}{)} \PY{o}{\PYZhy{}} \PY{p}{(}\PY{n}{mu}\PY{o}{+}\PY{n}{alpha3}\PY{p}{)} \PY{o}{+} \PY{p}{(}\PY{n}{mu}\PY{o}{+}\PY{n}{alpha4}\PY{p}{)} \PY{p}{)}
+    \PY{n}{trace\PYZus{}mu\PYZus{}differences} \PY{o}{=} \PY{n}{pm}\PY{o}{.}\PY{n}{sample}\PY{p}{(}\PY{l+m+mi}{5000}\PY{p}{,} \PY{n}{tune}\PY{o}{=}\PY{l+m+mi}{5000}\PY{p}{,} \PY{n}{init}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{adapt\PYZus{}diag}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+Auto-assigning NUTS sampler{\ldots}
+Initializing NUTS using adapt\_diag{\ldots}
+Multiprocess sampling (4 chains in 4 jobs)
+NUTS: [alpha4, alpha3, alpha2, sigma, mu]
+    \end{Verbatim}
+
+    
+    \begin{verbatim}
+<IPython.core.display.HTML object>
+    \end{verbatim}
+
+    
+    \begin{Verbatim}[commandchars=\\\{\}]
+Sampling 4 chains for 5\_000 tune and 5\_000 draw iterations (20\_000 + 20\_000
+draws total) took 32 seconds.
+    \end{Verbatim}
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{20}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{az}\PY{o}{.}\PY{n}{summary}\PY{p}{(}\PY{n}{trace\PYZus{}mu\PYZus{}differences}\PY{p}{,} \PY{n}{stat\PYZus{}funcs}\PY{o}{=}\PY{p}{\PYZob{}}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{hdi\PYZus{}2.5}\PY{l+s+s2}{\PYZpc{}}\PY{l+s+s2}{\PYZdq{}}\PY{p}{:} \PY{k}{lambda} \PY{n}{x}\PY{p}{:}\PY{n}{np}\PY{o}{.}\PY{n}{percentile}\PY{p}{(}\PY{n}{x}\PY{p}{,} \PY{l+m+mf}{2.5}\PY{p}{)}\PY{p}{,} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{hdi\PYZus{}97.5}\PY{l+s+s2}{\PYZpc{}}\PY{l+s+s2}{\PYZdq{}}\PY{p}{:} \PY{k}{lambda} \PY{n}{x} \PY{p}{:} \PY{n}{np}\PY{o}{.}\PY{n}{percentile}\PY{p}{(}\PY{n}{x}\PY{p}{,} \PY{l+m+mf}{97.5}\PY{p}{)}\PY{p}{\PYZcb{}}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+/opt/anaconda3/lib/python3.7/site-packages/arviz/data/io\_pymc3.py:91:
+FutureWarning: Using `from\_pymc3` without the model will be deprecated in a
+future release. Not using the model will return less accurate and less useful
+results. Make sure you use the model argument or call from\_pymc3 within a model
+context.
+  FutureWarning,
+    \end{Verbatim}
+
+            \begin{tcolorbox}[breakable, size=fbox, boxrule=.5pt, pad at break*=1mm, opacityfill=0]
+\prompt{Out}{outcolor}{20}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+               mean     sd  hdi\_3\%  hdi\_97\%  mcse\_mean  mcse\_sd  ess\_mean  \textbackslash{}
+mu            2.431  1.070   0.479    4.483      0.008    0.006   18756.0
+alpha2        0.052  0.971  -1.748    1.897      0.006    0.007   27182.0
+alpha3        0.104  0.978  -1.703    1.947      0.006    0.007   26466.0
+alpha4        0.162  0.971  -1.652    1.978      0.007    0.006   20756.0
+sigma        16.228  2.131  12.434   20.276      0.016    0.011   17872.0
+alpha1       -0.318  1.634  -3.391    2.697      0.010    0.011   26951.0
+a1-a2        -0.370  2.324  -4.827    3.944      0.014    0.016   27645.0
+a1-a3        -0.423  2.329  -4.769    3.881      0.014    0.016   27860.0
+a1-a4        -0.481  2.315  -4.933    3.740      0.015    0.015   24277.0
+a2-a3        -0.052  1.392  -2.641    2.575      0.009    0.010   26296.0
+a2-a4        -0.110  1.395  -2.741    2.486      0.009    0.010   22736.0
+a3-a4        -0.058  1.404  -2.758    2.511      0.009    0.010   21936.0
+μ1−μ2−μ3+μ4  -0.312  2.730  -5.334    4.952      0.017    0.019   27359.0
+
+              ess\_sd  ess\_bulk  ess\_tail  r\_hat  hdi\_2.5\%  hdi\_97.5\%
+mu           17889.0   18746.0   16089.0    1.0     0.331      4.497
+alpha2        9812.0   27181.0   15304.0    1.0    -1.862      1.946
+alpha3       10612.0   26470.0   14907.0    1.0    -1.800      2.007
+alpha4       11464.0   20765.0   15920.0    1.0    -1.721      2.068
+sigma        17872.0   17655.0   14169.0    1.0    12.573     20.920
+alpha1       10936.0   26919.0   15512.0    1.0    -3.510      2.845
+a1-a2        10479.0   27633.0   15421.0    1.0    -4.955      4.153
+a1-a3        10827.0   27869.0   15191.0    1.0    -4.938      4.088
+a1-a4        11300.0   24279.0   15715.0    1.0    -5.008      4.065
+a2-a3        10330.0   26357.0   15717.0    1.0    -2.786      2.668
+a2-a4        10619.0   22738.0   15147.0    1.0    -2.866      2.598
+a3-a4        10874.0   21939.0   15360.0    1.0    -2.786      2.702
+μ1−μ2−μ3+μ4  10512.0   27357.0   14806.0    1.0    -5.659      5.032
+\end{Verbatim}
+\end{tcolorbox}
+        
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{43}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n+nb}{print}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{95}\PY{l+s+si}{\PYZpc{} c}\PY{l+s+s2}{redible set of μ1−μ2−μ3+μ4 : [}\PY{l+s+si}{\PYZob{}\PYZcb{}}\PY{l+s+s2}{ , }\PY{l+s+si}{\PYZob{}\PYZcb{}}\PY{l+s+s2}{]}\PY{l+s+s2}{\PYZdq{}}\PY{o}{.}\PY{n}{format}\PY{p}{(}\PY{o}{\PYZhy{}}\PY{l+m+mf}{5.659}\PY{p}{,} \PY{l+m+mf}{5.032}\PY{p}{)} \PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+95\% credible set of μ1−μ2−μ3+μ4 : [-5.659 , 5.032]
+    \end{Verbatim}
+
+    This scenario is to test \(H_0 : \mu_1 + \mu_4 = \mu_3 + \mu_2 = 0\) VS.
+\(H_1 : \mu_1 + \mu_4 \neq \mu_2 + \mu_3\)
+
+\((\mu_1+\mu_4) - (\mu_2+\mu_3)\) still covers 0. So two treatments
+which are added together more likely do not show difference of heights.
+
+    \hypertarget{hockingpendleton-data}{%
+\section{Hocking--Pendleton Data}\label{hockingpendleton-data}}
+
+This popular data set was constructed by Hocking and Pendelton (1982) to
+illustrate influential and outlier observations in regression. The data
+are organized as a matrix of size 26 × 4; the predictors \(x_1\) ,
+\(x_2\) , and \(x_3\) are the first three columns, and the response y is
+the fourth column. The data are given in hockpend.dat
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{22}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{df3} \PY{o}{=} \PY{n}{pd}\PY{o}{.}\PY{n}{read\PYZus{}csv}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{hockpend.dat}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,} \PY{n}{sep}\PY{o}{=}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+se}{\PYZbs{}t}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,} \PY{n}{header}\PY{o}{=}\PY{k+kc}{None}\PY{p}{)}\PY{o}{.}\PY{n}{rename}\PY{p}{(}\PY{n}{columns}\PY{o}{=}\PY{p}{\PYZob{}}\PY{l+m+mi}{0}\PY{p}{:}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{x1}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,} \PY{l+m+mi}{1}\PY{p}{:}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{x2}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,} \PY{l+m+mi}{2}\PY{p}{:}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{x3}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,} \PY{l+m+mi}{3}\PY{p}{:} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{y}\PY{l+s+s2}{\PYZdq{}}\PY{p}{\PYZcb{}}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{23}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{df3}\PY{o}{.}\PY{n}{head}\PY{p}{(}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
+
+            \begin{tcolorbox}[breakable, size=fbox, boxrule=.5pt, pad at break*=1mm, opacityfill=0]
+\prompt{Out}{outcolor}{23}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+       x1     x2     x3       y
+0  12.980  0.317  9.998  57.702
+1  14.295  2.028  6.776  59.295
+2  15.531  5.305  2.947  55.166
+3  15.133  4.738  4.201  55.767
+4  15.342  7.038  2.053  51.722
+\end{Verbatim}
+\end{tcolorbox}
+        
+    \hypertarget{a-fit-the-linear-regression-model-with-the-three-covariates-report-the-parameter-estimates-and-bayesian-r2}{%
+\subsection{\texorpdfstring{(a) Fit the linear regression model with the
+three covariates, report the parameter estimates and Bayesian
+\(R^2\)}{(a) Fit the linear regression model with the three covariates, report the parameter estimates and Bayesian R\^{}2}}\label{a-fit-the-linear-regression-model-with-the-three-covariates-report-the-parameter-estimates-and-bayesian-r2}}
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{24}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{k}{with} \PY{n}{pm}\PY{o}{.}\PY{n}{Model}\PY{p}{(}\PY{p}{)} \PY{k}{as} \PY{n}{linear\PYZus{}model}\PY{p}{:}
+    \PY{n}{pm}\PY{o}{.}\PY{n}{glm}\PY{o}{.}\PY{n}{linear}\PY{o}{.}\PY{n}{GLM}\PY{p}{(}\PY{n}{y}\PY{o}{=}\PY{n}{df3}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{y}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}\PY{p}{,} \PY{n}{x}\PY{o}{=} \PY{n}{df3}\PY{p}{[}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{x1}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{x2}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{x3}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}\PY{p}{]}\PY{p}{,} \PY{n}{intercept}\PY{o}{=}\PY{k+kc}{True}\PY{p}{,} 
+                      \PY{n}{family}\PY{o}{=}\PY{n}{pm}\PY{o}{.}\PY{n}{glm}\PY{o}{.}\PY{n}{families}\PY{o}{.}\PY{n}{Normal}\PY{p}{(}\PY{p}{)}\PY{p}{)}
+    \PY{n}{trace\PYZus{}lm} \PY{o}{=} \PY{n}{pm}\PY{o}{.}\PY{n}{sample}\PY{p}{(}\PY{l+m+mi}{5000}\PY{p}{,} \PY{n}{tune}\PY{o}{=}\PY{l+m+mi}{5000}\PY{p}{,} \PY{n}{init}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{adapt\PYZus{}diag}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+    \PY{n}{posterior\PYZus{}predictive\PYZus{}lm} \PY{o}{=} \PY{n}{pm}\PY{o}{.}\PY{n}{sample\PYZus{}posterior\PYZus{}predictive}\PY{p}{(}\PY{n}{trace\PYZus{}lm}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+Auto-assigning NUTS sampler{\ldots}
+Initializing NUTS using adapt\_diag{\ldots}
+Multiprocess sampling (4 chains in 4 jobs)
+NUTS: [sd, x3, x2, x1, Intercept]
+    \end{Verbatim}
+
+    
+    \begin{verbatim}
+<IPython.core.display.HTML object>
+    \end{verbatim}
+
+    
+    \begin{Verbatim}[commandchars=\\\{\}]
+Sampling 4 chains for 5\_000 tune and 5\_000 draw iterations (20\_000 + 20\_000
+draws total) took 90 seconds.
+There were 249 divergences after tuning. Increase `target\_accept` or
+reparameterize.
+There were 125 divergences after tuning. Increase `target\_accept` or
+reparameterize.
+There were 1695 divergences after tuning. Increase `target\_accept` or
+reparameterize.
+The acceptance probability does not match the target. It is 0.4309795324404258,
+but should be close to 0.8. Try to increase the number of tuning steps.
+There were 26 divergences after tuning. Increase `target\_accept` or
+reparameterize.
+The rhat statistic is larger than 1.05 for some parameters. This indicates
+slight problems during sampling.
+The estimated number of effective samples is smaller than 200 for some
+parameters.
+    \end{Verbatim}
+
+    
+    \begin{verbatim}
+<IPython.core.display.HTML object>
+    \end{verbatim}
+
+    
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{25}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{az}\PY{o}{.}\PY{n}{summary}\PY{p}{(}\PY{n}{trace\PYZus{}lm}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+/opt/anaconda3/lib/python3.7/site-packages/arviz/data/io\_pymc3.py:91:
+FutureWarning: Using `from\_pymc3` without the model will be deprecated in a
+future release. Not using the model will return less accurate and less useful
+results. Make sure you use the model argument or call from\_pymc3 within a model
+context.
+  FutureWarning,
+    \end{Verbatim}
+
+            \begin{tcolorbox}[breakable, size=fbox, boxrule=.5pt, pad at break*=1mm, opacityfill=0]
+\prompt{Out}{outcolor}{25}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+            mean     sd  hdi\_3\%  hdi\_97\%  mcse\_mean  mcse\_sd  ess\_mean  \textbackslash{}
+Intercept  9.303  9.702  -9.351   25.252      1.588    1.132      37.0
+x1         3.399  0.547   2.505    4.487      0.085    0.060      42.0
+x2        -1.461  0.251  -1.874   -0.972      0.027    0.019      86.0
+x3         0.318  0.280  -0.162    0.840      0.040    0.029      48.0
+sd         2.638  0.438   1.847    3.406      0.043    0.031     102.0
+
+           ess\_sd  ess\_bulk  ess\_tail  r\_hat
+Intercept    37.0      37.0     784.0   1.07
+x1           42.0      41.0    1411.0   1.06
+x2           86.0      86.0     745.0   1.03
+x3           48.0      47.0     644.0   1.06
+sd          102.0      76.0      47.0   1.03
+\end{Verbatim}
+\end{tcolorbox}
+        
+    There are five estimated parameters. The estimated coefficients of the
+intercept, \(x_1\), \(x_2\), \(x_3\) and standard deviation are 9.303,
+3.399, -1.461, 0.318 and 2.638, respectively.
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{26}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{r2\PYZus{}scores} \PY{o}{=} \PY{p}{[}\PY{p}{]}
+\PY{n}{y\PYZus{}true} \PY{o}{=} \PY{n}{df3}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{y}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}
+\PY{k}{for} \PY{n}{i} \PY{o+ow}{in} \PY{n+nb}{range}\PY{p}{(}\PY{n+nb}{len}\PY{p}{(}\PY{n}{posterior\PYZus{}predictive\PYZus{}lm}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{y}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}\PY{p}{)}\PY{p}{)}\PY{p}{:}
+    \PY{n}{y\PYZus{}pred} \PY{o}{=} \PY{n}{posterior\PYZus{}predictive\PYZus{}lm}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{y}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}\PY{p}{[}\PY{n}{i}\PY{p}{]}
+    \PY{n}{r2} \PY{o}{=} \PY{n}{az}\PY{o}{.}\PY{n}{r2\PYZus{}score}\PY{p}{(}\PY{n}{y\PYZus{}true}\PY{p}{,} \PY{n}{y\PYZus{}pred}\PY{p}{)}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}
+    \PY{n}{r2\PYZus{}scores}\PY{o}{.}\PY{n}{append}\PY{p}{(}\PY{n}{r2}\PY{p}{)}
+\PY{n+nb}{print}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{Mean of BR2: }\PY{l+s+s2}{\PYZdq{}}\PY{p}{,} \PY{n}{np}\PY{o}{.}\PY{n}{mean}\PY{p}{(}\PY{n}{r2\PYZus{}scores}\PY{p}{)}\PY{p}{)}
+\PY{n+nb}{print}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{Standard deviation of BR2: }\PY{l+s+s2}{\PYZdq{}}\PY{p}{,} \PY{n}{np}\PY{o}{.}\PY{n}{std}\PY{p}{(}\PY{n}{r2\PYZus{}scores}\PY{p}{)}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+Mean of BR2:  0.7605379992456223
+Standard deviation of BR2:  0.061840177107345136
+    \end{Verbatim}
+
+    \hypertarget{b-is-any-of-the-26-observations-influential-or-outlier-in-the-sense-of-cpo-and-cumulative}{%
+\subsection{(b) Is any of the 26 observations influential or outlier (in
+the sense of CPO and
+cumulative)?}\label{b-is-any-of-the-26-observations-influential-or-outlier-in-the-sense-of-cpo-and-cumulative}}
+
+    \hypertarget{cumulative}{%
+\subsubsection{Cumulative}\label{cumulative}}
+
+    We use Cumulative to check whether each data point is an outlier. The
+concpt is to use the distribution defined in each iteration and then we
+will check where the observed value locates in its cumulative
+distribution. So after simulation, we could see the means of each data
+point. If the data point is close to 1 or 0, it is more likely to
+conclude it is an outlier.
+
+Based on the above samples, our model is:
+
+\(y_i = \beta_0 + \beta_1 * x_{i1} + \beta_2 * x_{i2} + \beta_3 * x_{i3} + \epsilon_i,\ where\ \epsilon_i \sim N(0, \sigma^2),\ i = 1, 2, \dots, 26\)
+
+And, we define each coefficient except \(\beta_0\) as \(N(0, 10^{-5})\).
+As for the intercept, we use the Flat prior.
+
+\(y_i \sim N(\beta_0 + \beta_1 * x_{i1} + \beta_2 * x_{i2} + \beta_3 * x_{i3}, \eta=sd^{2})\)
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{27}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{k+kn}{from} \PY{n+nn}{scipy}\PY{n+nn}{.}\PY{n+nn}{stats} \PY{k+kn}{import} \PY{n}{norm}
+\end{Verbatim}
+\end{tcolorbox}
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{28}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{df\PYZus{}trace} \PY{o}{=} \PY{n}{pm}\PY{o}{.}\PY{n}{backends}\PY{o}{.}\PY{n}{tracetab}\PY{o}{.}\PY{n}{trace\PYZus{}to\PYZus{}dataframe}\PY{p}{(}\PY{n}{trace\PYZus{}lm}\PY{p}{)}
+\PY{n}{df\PYZus{}trace}\PY{o}{.}\PY{n}{head}\PY{p}{(}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
+
+            \begin{tcolorbox}[breakable, size=fbox, boxrule=.5pt, pad at break*=1mm, opacityfill=0]
+\prompt{Out}{outcolor}{28}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+   Intercept        x1        x2        x3        sd
+0   5.601625  3.622686 -1.233575  0.274603  2.855812
+1   7.631317  3.312460 -1.100052  0.625191  2.919152
+2   5.730193  3.375129 -0.908699  0.620648  2.695725
+3   5.979099  3.553475 -1.339585  0.523389  3.046800
+4   3.279882  3.805025 -1.496413  0.331836  2.304360
+\end{Verbatim}
+\end{tcolorbox}
+        
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{29}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{cuy} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{zeros}\PY{p}{(}\PY{l+m+mi}{26}\PY{p}{)}
+
+\PY{k}{for} \PY{n}{i} \PY{o+ow}{in} \PY{n+nb}{range}\PY{p}{(}\PY{n}{df\PYZus{}trace}\PY{o}{.}\PY{n}{shape}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}\PY{p}{)}\PY{p}{:}
+    \PY{n}{intercept} \PY{o}{=} \PY{n}{df\PYZus{}trace}\PY{o}{.}\PY{n}{iloc}\PY{p}{[}\PY{n}{i}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{]}
+    \PY{n}{b1} \PY{o}{=} \PY{n}{df\PYZus{}trace}\PY{o}{.}\PY{n}{iloc}\PY{p}{[}\PY{n}{i}\PY{p}{,} \PY{l+m+mi}{1}\PY{p}{]}
+    \PY{n}{b2} \PY{o}{=} \PY{n}{df\PYZus{}trace}\PY{o}{.}\PY{n}{iloc}\PY{p}{[}\PY{n}{i}\PY{p}{,} \PY{l+m+mi}{2}\PY{p}{]}
+    \PY{n}{b3} \PY{o}{=} \PY{n}{df\PYZus{}trace}\PY{o}{.}\PY{n}{iloc}\PY{p}{[}\PY{n}{i}\PY{p}{,} \PY{l+m+mi}{3}\PY{p}{]}
+    \PY{n}{sd} \PY{o}{=} \PY{n}{df\PYZus{}trace}\PY{o}{.}\PY{n}{iloc}\PY{p}{[}\PY{n}{i}\PY{p}{,} \PY{l+m+mi}{4}\PY{p}{]}
+    \PY{k}{for} \PY{n}{j} \PY{o+ow}{in} \PY{n+nb}{range}\PY{p}{(}\PY{l+m+mi}{26}\PY{p}{)}\PY{p}{:}
+        \PY{n}{obs} \PY{o}{=} \PY{n}{df3}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{y}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}\PY{p}{[}\PY{n}{j}\PY{p}{]}
+        \PY{n}{cuy}\PY{p}{[}\PY{n}{j}\PY{p}{]} \PY{o}{+}\PY{o}{=} \PY{n}{norm}\PY{o}{.}\PY{n}{cdf}\PY{p}{(}\PY{n}{obs}\PY{p}{,} \PY{n}{loc}\PY{o}{=}\PY{n}{intercept} \PY{o}{+} \PY{n}{b1} \PY{o}{*} \PY{n}{df3}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{x1}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}\PY{p}{[}\PY{n}{j}\PY{p}{]} \PY{o}{+} \PY{n}{b2} \PY{o}{*} \PY{n}{df3}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{x2}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}\PY{p}{[}\PY{n}{j}\PY{p}{]} \PY{o}{+} \PY{n}{b3} \PY{o}{*} \PY{n}{df3}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{x3}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}\PY{p}{[}\PY{n}{j}\PY{p}{]}\PY{p}{,} \PY{n}{scale}\PY{o}{=}\PY{n}{sd}\PY{p}{)} 
+\end{Verbatim}
+\end{tcolorbox}
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{30}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{outlier\PYZus{}check} \PY{o}{=} \PY{n}{cuy} \PY{o}{/} \PY{n}{df\PYZus{}trace}\PY{o}{.}\PY{n}{shape}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}
+\end{Verbatim}
+\end{tcolorbox}
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{31}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{outlier\PYZus{}check}
+\end{Verbatim}
+\end{tcolorbox}
+
+            \begin{tcolorbox}[breakable, size=fbox, boxrule=.5pt, pad at break*=1mm, opacityfill=0]
+\prompt{Out}{outcolor}{31}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+array([0.70828015, 0.79224846, 0.48248859, 0.5920942 , 0.4845708 ,
+       0.72007163, 0.69536282, 0.39574399, 0.66401189, 0.69294881,
+       0.22093436, 0.52572268, 0.62230292, 0.3701755 , 0.00388224,
+       0.36372404, 0.94331224, 0.03018092, 0.30486989, 0.77054044,
+       0.53216637, 0.68297244, 0.56086072, 0.5843513 , 0.47637694,
+       0.40871561])
+\end{Verbatim}
+\end{tcolorbox}
+        
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{32}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{outlier\PYZus{}check}\PY{p}{[}\PY{n}{outlier\PYZus{}check}\PY{o}{\PYZlt{}}\PY{l+m+mf}{0.1}\PY{p}{]}
+\end{Verbatim}
+\end{tcolorbox}
+
+            \begin{tcolorbox}[breakable, size=fbox, boxrule=.5pt, pad at break*=1mm, opacityfill=0]
+\prompt{Out}{outcolor}{32}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+array([0.00388224, 0.03018092])
+\end{Verbatim}
+\end{tcolorbox}
+        
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{33}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{outlier\PYZus{}check}\PY{p}{[}\PY{n}{outlier\PYZus{}check}\PY{o}{\PYZgt{}}\PY{l+m+mf}{0.9}\PY{p}{]}
+\end{Verbatim}
+\end{tcolorbox}
+
+            \begin{tcolorbox}[breakable, size=fbox, boxrule=.5pt, pad at break*=1mm, opacityfill=0]
+\prompt{Out}{outcolor}{33}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+array([0.94331224])
+\end{Verbatim}
+\end{tcolorbox}
+        
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{45}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{np}\PY{o}{.}\PY{n}{where}\PY{p}{(}\PY{n}{outlier\PYZus{}check}\PY{o}{==}\PY{l+m+mf}{0.0038822393888119306}\PY{p}{)}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}\PY{o}{+}\PY{l+m+mi}{1}
+\end{Verbatim}
+\end{tcolorbox}
+
+            \begin{tcolorbox}[breakable, size=fbox, boxrule=.5pt, pad at break*=1mm, opacityfill=0]
+\prompt{Out}{outcolor}{45}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+array([15])
+\end{Verbatim}
+\end{tcolorbox}
+        
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{46}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{np}\PY{o}{.}\PY{n}{where}\PY{p}{(}\PY{n}{outlier\PYZus{}check}\PY{o}{==} \PY{l+m+mf}{0.030180919979533604}\PY{p}{)}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}\PY{o}{+}\PY{l+m+mi}{1}
+\end{Verbatim}
+\end{tcolorbox}
+
+            \begin{tcolorbox}[breakable, size=fbox, boxrule=.5pt, pad at break*=1mm, opacityfill=0]
+\prompt{Out}{outcolor}{46}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+array([18])
+\end{Verbatim}
+\end{tcolorbox}
+        
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{47}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{np}\PY{o}{.}\PY{n}{where}\PY{p}{(}\PY{n}{outlier\PYZus{}check}\PY{o}{==}\PY{l+m+mf}{0.9433122366137262}\PY{p}{)}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}\PY{o}{+}\PY{l+m+mi}{1}
+\end{Verbatim}
+\end{tcolorbox}
+
+            \begin{tcolorbox}[breakable, size=fbox, boxrule=.5pt, pad at break*=1mm, opacityfill=0]
+\prompt{Out}{outcolor}{47}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+array([17])
+\end{Verbatim}
+\end{tcolorbox}
+        
+    Originally, I chose the \(\alpha = 0.2\) and found the 15th, 17th and
+18th observations are more likely outliers since the means of these
+observations are either too close to 0 and 1.
+
+If we choose the smaller confidence level, like we change \(\alpha\) to
+\(\alpha=0.05\), the obvious outlier is the 15th data point.
+
+    \hypertarget{c-find-the-mean-response-and-prediction-response-for-a-new-observation-with-covariates-x_1-10-x_2-5-and-x_3-5.-report-the-corresponding-95-credible-sets}{%
+\subsection{\texorpdfstring{(c) Find the mean response and prediction
+response for a new observation with covariates \(x^{*}_1 = 10\),
+\(x^{*}_2 = 5\), and \(x^{*}_3 = 5\). Report the corresponding 95\%
+credible
+sets}{(c) Find the mean response and prediction response for a new observation with covariates x\^{}\{*\}\_1 = 10, x\^{}\{*\}\_2 = 5, and x\^{}\{*\}\_3 = 5. Report the corresponding 95\% credible sets}}\label{c-find-the-mean-response-and-prediction-response-for-a-new-observation-with-covariates-x_1-10-x_2-5-and-x_3-5.-report-the-corresponding-95-credible-sets}}
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{37}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{new\PYZus{}df} \PY{o}{=} \PY{n}{pd}\PY{o}{.}\PY{n}{DataFrame}\PY{p}{(}\PY{p}{\PYZob{}}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{x1}\PY{l+s+s2}{\PYZdq{}}\PY{p}{:}\PY{p}{[}\PY{l+m+mi}{10}\PY{p}{]}\PY{p}{,} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{x2}\PY{l+s+s2}{\PYZdq{}}\PY{p}{:} \PY{p}{[}\PY{l+m+mi}{5}\PY{p}{]}\PY{p}{,} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{x3}\PY{l+s+s2}{\PYZdq{}}\PY{p}{:} \PY{p}{[}\PY{l+m+mi}{5}\PY{p}{]}\PY{p}{,} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{y}\PY{l+s+s2}{\PYZdq{}}\PY{p}{:}\PY{p}{[}\PY{l+m+mf}{4.813} \PY{o}{+} \PY{l+m+mf}{3.648} \PY{o}{*} \PY{l+m+mi}{10} \PY{o}{+} \PY{p}{(}\PY{o}{\PYZhy{}}\PY{l+m+mf}{1.400}\PY{p}{)} \PY{o}{*} \PY{l+m+mi}{5} \PY{o}{+} \PY{l+m+mf}{0.420} \PY{o}{*} \PY{l+m+mi}{5}\PY{p}{]}\PY{p}{\PYZcb{}}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{38}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{k}{with} \PY{n}{pm}\PY{o}{.}\PY{n}{Model}\PY{p}{(}\PY{p}{)} \PY{k}{as} \PY{n}{lm\PYZus{}pred}\PY{p}{:}    
+    \PY{n}{pm}\PY{o}{.}\PY{n}{glm}\PY{o}{.}\PY{n}{linear}\PY{o}{.}\PY{n}{GLM}\PY{p}{(}\PY{n}{y}\PY{o}{=}\PY{n}{new\PYZus{}df}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{y}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}\PY{p}{,}
+                      \PY{n}{x}\PY{o}{=}\PY{n}{new\PYZus{}df}\PY{p}{[}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{x1}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{x2}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{x3}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}\PY{p}{]}\PY{p}{,} \PY{n}{intercept}\PY{o}{=}\PY{k+kc}{True}\PY{p}{,} 
+                      \PY{n}{priors}\PY{o}{=}\PY{p}{\PYZob{}}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Intercept}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:}\PY{n}{pm}\PY{o}{.}\PY{n}{Normal}\PY{o}{.}\PY{n}{dist}\PY{p}{(}\PY{n}{mu}\PY{o}{=}\PY{l+m+mi}{0}\PY{p}{,} \PY{n}{sigma}\PY{o}{=}\PY{l+m+mf}{10.0}\PY{p}{)}\PY{p}{\PYZcb{}}\PY{p}{,}
+                      \PY{n}{family}\PY{o}{=}\PY{n}{pm}\PY{o}{.}\PY{n}{glm}\PY{o}{.}\PY{n}{families}\PY{o}{.}\PY{n}{Normal}\PY{p}{(}\PY{p}{)}\PY{p}{)}
+    \PY{n}{trace\PYZus{}lm\PYZus{}p} \PY{o}{=} \PY{n}{pm}\PY{o}{.}\PY{n}{sample}\PY{p}{(}\PY{l+m+mi}{5000}\PY{p}{,} \PY{n}{tune}\PY{o}{=}\PY{l+m+mi}{5000}\PY{p}{,} \PY{n}{init}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{adapt\PYZus{}diag}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+    \PY{n}{df} \PY{o}{=} \PY{n}{pm}\PY{o}{.}\PY{n}{trace\PYZus{}to\PYZus{}dataframe}\PY{p}{(}\PY{n}{trace\PYZus{}lm}\PY{p}{,} \PY{n}{include\PYZus{}transformed}\PY{o}{=}\PY{k+kc}{True}\PY{p}{)}
+    \PY{n}{ppc} \PY{o}{=} \PY{n}{pm}\PY{o}{.}\PY{n}{sample\PYZus{}posterior\PYZus{}predictive}\PY{p}{(}\PY{n}{trace}\PY{o}{=}\PY{n}{df}\PY{o}{.}\PY{n}{to\PYZus{}dict}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{records}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{,}\PY{n}{samples}\PY{o}{=}\PY{n+nb}{len}\PY{p}{(}\PY{n}{df}\PY{p}{)}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+Auto-assigning NUTS sampler{\ldots}
+Initializing NUTS using adapt\_diag{\ldots}
+Multiprocess sampling (4 chains in 4 jobs)
+NUTS: [sd, x3, x2, x1, Intercept]
+    \end{Verbatim}
+
+    
+    \begin{verbatim}
+<IPython.core.display.HTML object>
+    \end{verbatim}
+
+    
+    \begin{Verbatim}[commandchars=\\\{\}]
+Sampling 4 chains for 5\_000 tune and 5\_000 draw iterations (20\_000 + 20\_000
+draws total) took 39 seconds.
+There were 2345 divergences after tuning. Increase `target\_accept` or
+reparameterize.
+The acceptance probability does not match the target. It is 0.3403953364767104,
+but should be close to 0.8. Try to increase the number of tuning steps.
+There were 1798 divergences after tuning. Increase `target\_accept` or
+reparameterize.
+The acceptance probability does not match the target. It is 0.44437999849911075,
+but should be close to 0.8. Try to increase the number of tuning steps.
+There were 3543 divergences after tuning. Increase `target\_accept` or
+reparameterize.
+The acceptance probability does not match the target. It is 0.05906703653418209,
+but should be close to 0.8. Try to increase the number of tuning steps.
+There were 2760 divergences after tuning. Increase `target\_accept` or
+reparameterize.
+The acceptance probability does not match the target. It is 0.30560815998471047,
+but should be close to 0.8. Try to increase the number of tuning steps.
+The rhat statistic is larger than 1.4 for some parameters. The sampler did not
+converge.
+The estimated number of effective samples is smaller than 200 for some
+parameters.
+    \end{Verbatim}
+
+    
+    \begin{verbatim}
+<IPython.core.display.HTML object>
+    \end{verbatim}
+
+    
+    Prediction response:
+
+This means the result is derived based on inputs and coefficients.
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{1}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{l+m+mf}{4.813} \PY{o}{+} \PY{l+m+mf}{3.648} \PY{o}{*} \PY{l+m+mi}{10} \PY{o}{+} \PY{p}{(}\PY{o}{\PYZhy{}}\PY{l+m+mf}{1.400}\PY{p}{)} \PY{o}{*} \PY{l+m+mi}{5} \PY{o}{+} \PY{l+m+mf}{0.420} \PY{o}{*} \PY{l+m+mi}{5}
+\end{Verbatim}
+\end{tcolorbox}
+
+            \begin{tcolorbox}[breakable, size=fbox, boxrule=.5pt, pad at break*=1mm, opacityfill=0]
+\prompt{Out}{outcolor}{1}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+36.39300000000001
+\end{Verbatim}
+\end{tcolorbox}
+        
+    Mean response:
+
+This means that based on each iteration, we get estimated coefficients
+and then have multiple response values. We take expectation on these
+values.
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{40}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{ppc}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{y}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}\PY{o}{.}\PY{n}{mean}\PY{p}{(}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
+
+            \begin{tcolorbox}[breakable, size=fbox, boxrule=.5pt, pad at break*=1mm, opacityfill=0]
+\prompt{Out}{outcolor}{40}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+37.576426132208155
+\end{Verbatim}
+\end{tcolorbox}
+        
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{41}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{az}\PY{o}{.}\PY{n}{hdi}\PY{p}{(}\PY{n}{ppc}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{y}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}\PY{p}{,} \PY{n}{hdi\PYZus{}prob}\PY{o}{=}\PY{l+m+mf}{0.95}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+/opt/anaconda3/lib/python3.7/site-packages/arviz/stats/stats.py:487:
+FutureWarning: hdi currently interprets 2d data as (draw, shape) but this will
+change in a future release to (chain, draw) for coherence with other functions
+  FutureWarning,
+    \end{Verbatim}
+
+            \begin{tcolorbox}[breakable, size=fbox, boxrule=.5pt, pad at break*=1mm, opacityfill=0]
+\prompt{Out}{outcolor}{41}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+array([[29.97973519, 44.50649613]])
+\end{Verbatim}
+\end{tcolorbox}
+        
+    The prediction response is 36.39300000000001.
+
+The mean response is 37.576426132208155 and the 95\% credible set is
+between 29.97973519 and 44.50649613.
+
+
+    % Add a bibliography block to the postdoc
+    
+    
+    
+\end{document}
