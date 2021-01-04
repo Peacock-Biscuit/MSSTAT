@@ -1,0 +1,618 @@
+---
+title: "Final"
+author: "Jim Liu"
+date: "12/6/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+For this problem we will be exploring a dataset of weekly aggregated closing prices for three different financial indices (Nasdaq, S&P, and Dow) beginning in January of 2015 and ending with August of 2020. Included is initialization code as well as a script containing some prebuilt methods which may prove helpful.
+
+Note: All analysis and modelling should use the respective “train” datasets; only use “test” data to compare forecast values.
+
+```{r}
+library(TSA)
+library(mgcv)
+library(vars)
+library(tseries)
+library(fGarch)
+library(rugarch)
+```
+
+
+```{r}
+data <- read.csv("/Users/jim/Dropbox (GaTech)/Courses/ISyE6402/Final/Final Data.csv")
+data
+data <- data[,c(2,3,4)]
+data.ts <- ts(data)
+dif.ts <- data.frame(diff(data.ts))
+
+train <- data[c(1:292),]
+train.dif <- dif.ts[c(1:291),]
+test <- data[c(293:296),]
+test.dif <- dif.ts[c(292:295),]
+```
+
+# Data Exploration and Simple Modeling - 15 Points
+
+1. Use graphical analysis on each dataset as well as its first difference. Comment on any relevant features of the three time series. Are there any similarities?
+
+
+```{r}
+nq.ts = ts(train$NQ)
+par(mfrow=c(1,2))
+ts.plot(nq.ts,main='NQ',ylab='Price', col='blue')
+acf(nq.ts,main='NQ', lag.max = 7 * 4)
+```
+
+```{r}
+dif.nq.ts = ts(train.dif$NQ)
+par(mfrow=c(1,2))
+ts.plot(dif.nq.ts,main='NQ Diff',ylab='Price', col='blue')
+acf(dif.nq.ts,main='NQ Diff', lag.max = 7 * 4)
+```
+
+
+```{r}
+sp.ts = ts(train$SP)
+par(mfrow=c(1,2))
+ts.plot(sp.ts,main='SP',ylab='Price', col='blue')
+acf(sp.ts,main='SP', lag.max = 7 * 4)
+```
+
+```{r}
+dif.sp.ts = ts(train.dif$SP)
+par(mfrow=c(1,2))
+ts.plot(dif.sp.ts,main='SP Diff',ylab='Price', col='blue')
+acf(dif.sp.ts,main='SP Diff', lag.max = 7 * 4)
+```
+
+
+
+```{r}
+dow.ts = ts(train$Dow)
+par(mfrow=c(1,2))
+ts.plot(dow.ts,main='DOW',ylab='Price', col='blue')
+acf(dow.ts,main='DOW', lag.max = 7 * 4)
+```
+
+```{r}
+dif.dow.ts = ts(train.dif$Dow)
+par(mfrow=c(1,2))
+ts.plot(dif.dow.ts,main='DOW Diff',ylab='Price', col='blue')
+acf(dif.dow.ts,main='DOW Diff', lag.max = 7 * 4)
+```
+
+
+2. For each original time series of the three financial indices, fit a third order parametric polynomial. Use graphical methods to perform residual analysis and comment on the fit.
+
+```{r}
+time.pts = c(1:nrow(train))
+time.pts = c(time.pts - min(time.pts))/max(time.pts)
+x1 = time.pts
+x2 = time.pts^2
+x3 = time.pts^3
+```
+
+
+```{r}
+nq.lm.fit = lm(train$NQ~x1+x2+x3)
+nq.resids.fit.lm=residuals(nq.lm.fit)
+plot(ts(nq.resids.fit.lm),main="NQ 3rd Order Parametric Polynomial Resids",cex=0.3,ylab="residuals",col='blue')
+acf(as.numeric(nq.resids.fit.lm),main="NQ ACF of Parametric Polynomial Resids",cex=0.3)
+```
+
+```{r}
+sp.lm.fit = lm(train$SP~x1+x2+x3)
+sp.resids.fit.lm=residuals(sp.lm.fit)
+plot(ts(sp.resids.fit.lm),main="SP 3rd Order Parametric Polynomial Resids",cex=0.3,ylab="residuals",col='blue')
+acf(as.numeric(sp.resids.fit.lm),main="SP ACF of Parametric Polynomial Resids",cex=0.3)
+```
+
+```{r}
+dow.lm.fit = lm(train$Dow~x1+x2+x3)
+dow.resids.fit.lm=residuals(dow.lm.fit)
+plot(ts(dow.resids.fit.lm),main="DOW 3rd Order Parametric Polynomial Resids",cex=0.3,ylab="residuals",col='blue')
+acf(as.numeric(dow.resids.fit.lm),main="DOW ACF of Parametric Polynomial Resids",cex=0.3)
+```
+
+3. Calculate Precision Measures (PM) and Mean Absolute Percentage Error (MAPE) on the fit of each model and compare them to one another in terms of model performance
+
+```{r}
+# PM
+sum((nq.lm.fit$fitted.values-train$NQ)^2)/sum((train$NQ-mean(train$NQ))^2)
+# MAPE
+mean(abs(nq.lm.fit$fitted.values-train$NQ)/train$NQ)
+```
+
+```{r}
+# PM
+sum((sp.lm.fit$fitted.values-train$SP)^2)/sum((train$SP-mean(train$SP))^2)
+# MAPE
+mean(abs(sp.lm.fit$fitted.values-train$SP)/train$SP)
+```
+
+```{r}
+# PM
+sum((dow.lm.fit$fitted.values-train$Dow)^2)/sum((train$Dow-mean(train$Dow))^2)
+# MAPE
+mean(abs(dow.lm.fit$fitted.values-train$Dow)/train$Dow)
+```
+
+
+4. Does the simple parametric approach appear to sufficiently capture main trend for all three time series? If not, comment on what some limitations this approach may have.
+
+No. residual analysis/acf/trend/ assumptions of stationary process
+
+# ARIMA Modeling - 20 Points
+
+1. For each dataset, use graphical approaches to attempt to assess possible orders p,d,q for an ARIMA model. State what orders you can infer (if any) using this method.
+
+```{r}
+acf(train$NQ, main = 'NQ ACF', lag.max = 99)
+pacf(train$NQ, main = 'NQ PACF', lag.max = 50)
+```
+
+```{r}
+acf(train.dif$NQ, main = 'NQ Diff ACF', lag.max = 200)
+pacf(train.dif$NQ, main = 'NQ Diff PACF', lag.max = 200)
+```
+
+```{r}
+acf(train$SP, main = 'SP ACF', lag.max = 93)
+pacf(train$SP, main = 'SP PACF', lag.max = 50)
+```
+
+```{r}
+acf(train.dif$SP, main = 'SP Diff ACF', lag.max = 200)
+pacf(train.dif$SP, main = 'SP Diff PACF', lag.max = 200)
+```
+
+```{r}
+acf(train$Dow, main = 'DOW ACF', lag.max = 90)
+pacf(train$Dow, main = 'DOW PACF', lag.max = 50)
+```
+
+```{r}
+acf(train.dif$Dow, main = 'DOW ACF', lag.max = 200)
+pacf(train.dif$Dow, main = 'DOW PACF', lag.max = 200)
+```
+
+2. For each differenced time series of the three financial indices, use the iterative AIC minimization approach with a max potential order of (4,2,4) to select and fit the ARIMA model with the selected orders.
+
+```{r}
+#ARIMA order selection, NQ
+test_modelA <- function(p,d,q){
+mod = arima(train.dif$NQ, order=c(p,d,q), method="ML")
+current.aic = AIC(mod)
+df = data.frame(p,d,q,current.aic)
+names(df) <- c("p","d","q","AIC")
+print(paste(p,d,q,current.aic,sep=" "))
+return(df)
+}
+
+orders = data.frame(Inf,Inf,Inf,Inf)
+names(orders) <- c("p","d","q","AIC")
+
+
+for (p in 0:4){
+  for (d in 0:2){
+    for (q in 0:4) {
+      possibleError <- tryCatch(
+        orders<-rbind(orders,test_modelA(p,d,q)),
+        error=function(e) e
+      )
+      if(inherits(possibleError, "error")) next
+
+    }
+  }
+}
+orders <- orders[order(-orders$AIC),]
+tail(orders)
+```
+
+```{r}
+#ARIMA order selection, SP
+test_modelA <- function(p,d,q){
+mod = arima(train.dif$SP, order=c(p,d,q), method="ML")
+current.aic = AIC(mod)
+df = data.frame(p,d,q,current.aic)
+names(df) <- c("p","d","q","AIC")
+print(paste(p,d,q,current.aic,sep=" "))
+return(df)
+}
+
+orders = data.frame(Inf,Inf,Inf,Inf)
+names(orders) <- c("p","d","q","AIC")
+
+
+for (p in 0:4){
+  for (d in 0:2){
+    for (q in 0:4) {
+      possibleError <- tryCatch(
+        orders<-rbind(orders,test_modelA(p,d,q)),
+        error=function(e) e
+      )
+      if(inherits(possibleError, "error")) next
+
+    }
+  }
+}
+orders <- orders[order(-orders$AIC),]
+tail(orders)
+```
+
+```{r}
+#ARIMA order selection, DOW
+test_modelA <- function(p,d,q){
+mod = arima(train.dif$Dow, order=c(p,d,q), method="ML")
+current.aic = AIC(mod)
+df = data.frame(p,d,q,current.aic)
+names(df) <- c("p","d","q","AIC")
+print(paste(p,d,q,current.aic,sep=" "))
+return(df)
+}
+
+orders = data.frame(Inf,Inf,Inf,Inf)
+names(orders) <- c("p","d","q","AIC")
+
+
+for (p in 0:4){
+  for (d in 0:2){
+    for (q in 0:4) {
+      possibleError <- tryCatch(
+        orders<-rbind(orders,test_modelA(p,d,q)),
+        error=function(e) e
+      )
+      if(inherits(possibleError, "error")) next
+
+    }
+  }
+}
+orders <- orders[order(-orders$AIC),]
+tail(orders)
+```
+
+3. Extract the roots for each model of the three time series (rounded to third decimal place) and comment what can be inferred from the root analysis.
+
+```{r}
+nq.arima <- arima(train.dif$NQ,order = c(2,1,3), method = "ML")
+#AR Roots
+round(abs( polyroot( c(1 , coef(nq.arima)[1:2]) )),3)
+#MA Roots
+round(abs( polyroot( c(1 , coef(nq.arima)[(2+1):(3+2)]) )),3)
+```
+
+```{r}
+sp.arima <- arima(train.dif$SP,order = c(1,0,4), method = "ML")
+#AR Roots
+round(abs( polyroot( c(1 , coef(sp.arima)[1:1]) )),3)
+#MA Roots
+round(abs( polyroot( c(1 , coef(sp.arima)[(1+1):(4+1)]) )),3)
+```
+
+
+```{r}
+dow.arima <- arima(train.dif$Dow,order = c(2,1,4), method = "ML")
+#AR Roots
+round(abs( polyroot( c(1 , coef(dow.arima)[1:2]) )),3)
+#MA Roots
+round(abs( polyroot( c(1 , coef(dow.arima)[(2+1):(4+2)]) )),3)
+```
+
+
+4. Forecast ahead 4 future data points (the last month) for each time series and calculate the prediction PM and MAPE measures. Additionally, perform Box-Pierce tests for each model and comment on what the results tell you.
+
+```{r}
+#NQ Accuracy
+preds1 <- as.vector(predict(nq.arima,n.ahead=4))
+preds <- preds1$pred
+obs <- test.dif$NQ
+#MAPE
+mean(abs(preds - obs)/abs(obs))
+#Precision
+sum((preds-obs)^2)/sum((obs-mean(obs))^2)
+```
+
+```{r}
+Box.test(resid(nq.arima), lag = 6, type = "Box-Pierce", fitdf = 5)
+```
+
+
+```{r}
+#SP Accuracy
+preds2 <- as.vector(predict(sp.arima,n.ahead=4))
+preds <- preds2$pred
+obs <- test.dif$SP
+#MAPE
+mean(abs(preds - obs)/abs(obs))
+#Precision
+sum((preds-obs)^2)/sum((obs-mean(obs))^2)
+```
+
+```{r}
+Box.test(resid(sp.arima), lag = 6, type = "Box-Pierce", fitdf = 5)
+```
+
+
+
+```{r}
+#DOW Accuracy
+preds3 <- as.vector(predict(dow.arima,n.ahead=4))
+preds <- preds3$pred
+obs <- test.dif$Dow
+#MAPE
+mean(abs(preds - obs)/abs(obs))
+#Precision
+sum((preds-obs)^2)/sum((obs-mean(obs))^2)
+```
+
+```{r}
+Box.test(resid(dow.arima), lag = 7, type = "Box-Pierce", fitdf = 6)
+```
+
+5. Does ARIMA modelling seem appropriate for these data? Why or why not? An ideal answer will include references to results as well as theory.
+
+No. 
+
+# Multivariate Modeling - 15 Points
+
+1. Using both the differenced and undifferenced time series, fit VAR models with orders selected by minimzing AIC. For each model use appropriate tests to assess the following residual assumptions: Constant Variance, Normality, Non-Correlation. Does either fit seem notably better?
+
+```{r}
+vs <- VARselect(train)
+vs$selection
+```
+
+```{r}
+mod <- VAR(train,p=8)
+## ARCH, Residual Analysis: Constant Variance Assumption
+arch.test(mod)
+## J-B, Residual Analysis: Normality Assumption
+normality.test(mod)
+## Portmantau, Residual Analysis: Uncorrelated Errors Assumption
+serial.test(mod)
+```
+
+```{r}
+vs.dif <- VARselect(train.dif)
+vs.dif$selection
+```
+
+```{r}
+mod.dif <- VAR(train.dif,p=7)
+## ARCH, Residual Analysis: Constant Variance Assumption
+arch.test(mod.dif)
+## J-B, Residual Analysis: Normality Assumption
+normality.test(mod.dif)
+## Portmantau, Residual Analysis: Uncorrelated Errors Assumption
+serial.test(mod.dif)
+```
+
+2. For both models, calculate the forecasting Prediction PM and MAPE on the appropriate training data for each time series. Compare the two models as well as compare to the ARIMA models 
+(Note: You do not need to undifference the data. PM and MAPE are unitless and robust to transformations and can be compared by order of magnitude; though differencing tends to inflate MAPE by roughly two orders of magnitude).
+
+```{r}
+preds.all <- as.vector(predict(mod,n.ahead=4))
+#NQ
+preds <- preds.all$fcst$NQ[,1]
+obs <- test$NQ
+#MAPE
+mean(abs(preds - obs)/abs(obs)) 
+#Precision
+sum((preds-obs)^2)/sum((obs-mean(obs))^2) 
+```
+
+```{r}
+preds.all <- as.vector(predict(mod.dif,n.ahead=4))
+#NQ Dif
+preds <- preds.all$fcst$NQ[,1]
+obs <- test.dif$NQ
+#MAPE
+mean(abs(preds - obs)/abs(obs)) 
+#Precision
+sum((preds-obs)^2)/sum((obs-mean(obs))^2) 
+```
+
+```{r}
+preds.all <- as.vector(predict(mod,n.ahead=4))
+#SP
+preds <- preds.all$fcst$SP[,1]
+obs <- test$SP
+#MAPE
+mean(abs(preds - obs)/abs(obs)) 
+#Precision
+sum((preds-obs)^2)/sum((obs-mean(obs))^2) 
+```
+
+```{r}
+preds.all <- as.vector(predict(mod.dif,n.ahead=4))
+#SP DIf
+preds <- preds.all$fcst$SP[,1]
+obs <- test.dif$SP
+#MAPE
+mean(abs(preds - obs)/abs(obs)) 
+#Precision
+sum((preds-obs)^2)/sum((obs-mean(obs))^2)
+```
+
+```{r}
+preds.all <- as.vector(predict(mod,n.ahead=4))
+#Dow
+preds <- preds.all$fcst$Dow[,1]
+obs <- test$Dow
+#MAPE
+mean(abs(preds - obs)/abs(obs)) 
+#Precision
+sum((preds-obs)^2)/sum((obs-mean(obs))^2) 
+```
+
+```{r}
+preds.all <- as.vector(predict(mod.dif,n.ahead=4))
+#Dow dif
+preds <- preds.all$fcst$Dow[,1]
+obs <- test.dif$Dow
+#MAPE
+mean(abs(preds - obs)/abs(obs)) 
+#Precision
+sum((preds-obs)^2)/sum((obs-mean(obs))^2) 
+```
+
+3. Citing both your results and relevant theory, does this dataset seem to benefit from a multivariate modelling method as opposed to univariate modeling?
+
+# Heteroskedasticity Modeling - 20 Points
+
+(Use training data for whole problem, including forecasts)
+
+1. Now using just the differenced Dow Jones data, use the iterative approach via BIC minimization (select only non-trivial orders) to select and fit the ‘best’ ARMA-GARCH (Max (4,4)x(2,2), start from ARMA(3,3)).
+
+```{r}
+# #Initial GARCH Order
+# #ARIMA-GARCH GARCH order
+test_modelAGG <- function(m,n){
+  spec = ugarchspec(variance.model=list(garchOrder=c(m,n)),
+                    mean.model=list(armaOrder=c(3,3),
+                      include.mean=T), distribution.model="std")
+                    fit = ugarchfit(spec, train.dif$Dow, solver = 'hybrid')
+                    current.bic = infocriteria(fit)[2]
+                    df = data.frame(m,n,current.bic)
+                    names(df) <- c("m","n","BIC")
+                    print(paste(m,n,current.bic,sep=" "))
+                    return(df)
+}
+
+orders = data.frame(Inf,Inf,Inf)
+names(orders) <- c("m","n","BIC")
+
+
+for (m in 0:2){
+     for (n in 0:2){
+          possibleError <- tryCatch(
+            orders<-rbind(orders,test_modelAGG(m,n)),
+            error=function(e) e
+          )
+          if(inherits(possibleError, "error")) next
+          }
+}
+orders <- orders[order(-orders$BIC),]
+tail(orders) # 2, 0
+```
+
+```{r}
+# #ARMA update
+# #ARIMA-GARCH ARIMA order
+test_modelAGA <- function(p,q){
+  spec = ugarchspec(variance.model=list(garchOrder=c(2,0)),
+    mean.model=list(armaOrder=c(p,q),
+                    include.mean=T), distribution.model="std")
+    fit = ugarchfit(spec, train.dif$Dow, solver = 'hybrid')
+    current.bic = infocriteria(fit)[2]
+    df = data.frame(p,q,current.bic)
+    names(df) <- c("p","q","BIC")
+    print(paste(p,q,current.bic,sep=" "))
+    return(df)
+}
+
+orders = data.frame(Inf,Inf,Inf)
+names(orders) <- c("p","q","BIC")
+
+
+for (p in 0:4){
+     for (q in 0:4){
+          possibleError <- tryCatch(
+            orders<-rbind(orders,test_modelAGA(p,q)),
+            error=function(e) e
+          )
+          if(inherits(possibleError, "error")) next
+          }
+}
+orders <- orders[order(-orders$BIC),]
+tail(orders) # 3, 3
+```
+
+```{r}
+# #GARCH update
+test_modelAGG <- function(m,n){
+  spec = ugarchspec(variance.model=list(garchOrder=c(m,n)),
+                    mean.model=list(armaOrder=c(3,3),
+                      include.mean=T), distribution.model="std")
+                    fit = ugarchfit(spec, train.dif$Dow, solver = 'hybrid')
+                    current.bic = infocriteria(fit)[2]
+                    df = data.frame(m,n,current.bic)
+                    names(df) <- c("m","n","BIC")
+                    print(paste(m,n,current.bic,sep=" "))
+                    return(df)
+}
+
+orders = data.frame(Inf,Inf,Inf)
+names(orders) <- c("m","n","BIC")
+
+
+for (m in 0:2){
+     for (n in 0:2){
+          possibleError <- tryCatch(
+            orders<-rbind(orders,test_modelAGG(m,n)),
+            error=function(e) e
+          )
+          if(inherits(possibleError, "error")) next
+          }
+}
+orders <- orders[order(-orders$BIC),]
+tail(orders) # 2,0
+```
+
+2. Print the coefficients, comment on their significance, and write out the model equation in full. Additionally, assess residual assumptions (Hint: Fit using garchFit method and check summary).
+
+```{r}
+final.model = garchFit(~ arma(3,3)+ garch(2,0), data=train.dif$Dow, trace = FALSE)
+summary(final.model)
+```
+
+3. Now using the selected model order, perform forecasts using the rolling method for the last 48 differenced Dow training values and calculate the Prediction PM and MAPE measures.
+
+```{r}
+train.dow = train.dif$Dow
+test = train.dow[(length(train.dow)-47):length(train.dow)]
+train = train.dow[1:(length(train.dow)-48)]
+
+
+nfore = length(test)
+fore.series = NULL
+
+spec = ugarchspec(variance.model=list(garchOrder=c(2,0)),
+                  mean.model=list(armaOrder=c(3, 3), 
+                                  include.mean=T), distribution.model="std")    
+
+
+for(f in 1: nfore){
+  ## Fit models
+  data = train
+  if(f>=2)
+    data = c(train,test[1:(f-1)])  
+  
+  final.model = ugarchfit(spec, data, solver = 'hybrid')
+  
+  ## Forecast
+  fore = ugarchforecast(final.model, n.ahead=1)
+  fore.series = c(fore.series, fore@forecast$seriesFor)
+  
+}
+
+#Accuracy measures
+
+preds <- fore.series
+obs <- tail(train.dow,48)
+
+#MAPE
+mean(abs(preds - obs)/abs(obs)) 
+#Precision
+sum((preds-obs)^2)/sum((obs-mean(obs))^2) 
+```
+
+
+4. Do you believe this model is a better fit than the alternatives? Why or why not?
+
+

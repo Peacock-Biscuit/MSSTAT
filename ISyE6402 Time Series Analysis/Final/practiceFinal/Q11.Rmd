@@ -1,0 +1,255 @@
+---
+title: "PracticeFinal"
+author: "Jim Liu"
+date: "12/5/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(TSA)
+library(mgcv)
+library(vars)
+library(tseries)
+library(fGarch)
+library(rugarch)
+
+erie = read.csv("/Users/jim/Dropbox (GaTech)/Courses/ISyE6402/Final/erie.csv", header = TRUE)
+```
+
+
+# Lake Erie Water Levels Analysis
+
+For this portion of the test, you will be examining the monthly average water levels of Lake Erie from 1921-1970. 
+
+For all questions in this R data analysis, make sure to provide the R code also. Show your work for full credit.
+
+## 1. Exploratory Analysis.
+
+### (a) Plot the time series and identify its main features, including trend and seasonality. Which assumptions of stationarity seem to be violated?
+
+
+```{r}
+erie.ts = ts(erie[, 2], start=c(1921,1), frequency = 12) 
+ts.plot(erie.ts, ylab="Water Level")
+```
+
+```{r}
+acf(erie.ts, lag.max = 12 * 12, cex=0.3, na.action = na.pass)
+```
+
+From the time series plot, we could see that this time series does not follow three assumptions:
+(1) constant mean: from the time series plot, we could see there is a trend.
+(2) constant variance: we could see the variance around 1930 is larger than other periods. So the variance is not constant.
+(3) covariance independent of time: based on the autocorelation plot, we could see there is a seasonality in this plot. 
+
+
+## 2. Estimating the trend.
+
+### (a) 
+Fit a nonparametric regression model to estimate the trend and seasonality of the time series. Provide the R output. Are the parameters significant at the 10% significant level? The following R code may be useful in getting you started in fitting the model.
+
+```{r}
+level = erie[,2]
+level = level[1:600]
+H = harmonic(ts(level, start = 1/12, end = 50, deltat = 1/12), 2)
+```
+
+```{r}
+time.pts = c(1:length(level))
+time.pts = c(time.pts - min(time.pts))/max(time.pts)
+```
+
+```{r}
+gam.fit = gam(level~s(time.pts)+H)
+dif.fit.gam = ts((level-fitted(gam.fit)),start=1921,frequency=12)
+ts.plot(dif.fit.gam,ylab="Residual Process")
+## Compare approaches 
+ts.plot(dif.fit.gam,ylab="Residual Process",col="brown")
+lines(dif.fit.gam,col="blue")
+```
+
+```{r}
+summary(gam.fit)
+```
+
+Most parameters except Hsin(4*pi*t) are statistically significant.
+
+### (b) 
+Use differencing to directly remove the trend and seasonality from the original time series. Report the order of integration. Plot the differenced time series, ACF and PACF and comment on the differenced time series.
+
+```{r}
+dif.erie.ts = diff(erie.ts, lag=12)
+acf(dif.erie.ts, na.action = na.pass, lag.max = 12 * 12)
+pacf(dif.erie.ts, na.action = na.pass, lag.max = 12 * 12)
+```
+
+Since the water level is related to months, we take the order = 12 to get differenced data. However, based on ACF and PACF, we could still see seasonality from the ACF plot.
+
+### (c) 
+Based on the plots made in the previous step, suggest an appropriate ARIMA model to fit. Refer to specific aspects of the ACF and/or PACF plots that lead you to suggest the model.
+
+ARIMA(0, 12, 8)
+
+## 3. ARIMA Modeling.
+
+(a) The are 81 ARIMA(p,1,q)(P,1,D) models. Select the best model based on AIC.
+
+
+```{r}
+test_modelA <- function(p,d,q){
+mod = arima(erie.ts, order=c(p,d,q), method="ML")
+current.aic = AIC(mod)
+df = data.frame(p,d,q,current.aic)
+names(df) <- c("p","d","q","AIC")
+print(paste(p,d,q,current.aic,sep=" "))
+return(df)
+}
+
+orders = data.frame(Inf,Inf,Inf,Inf)
+names(orders) <- c("p","d","q","AIC")
+
+
+for (p in 0:2){
+  for (d in 0:2){
+    for (q in 0:2) {
+      possibleError <- tryCatch(
+        orders<-rbind(orders,test_modelA(p,d,q)),
+        error=function(e) e
+      )
+      if(inherits(possibleError, "error")) next
+
+    }
+  }
+}
+orders <- orders[order(-orders$AIC),]
+tail(orders)
+```
+
+```{r}
+final_model = arima(erie.ts, order = c(2,1,2), method = "ML")
+```
+
+
+(b) Report the estimated model parameters and their 99% confidence intervals for the model selected in the previous question.
+
+```{r}
+library(lmtest)
+coeftest(final_model)
+```
+
+
+(c) Fit an ARIMA(1,1,3)(0,1,1) model to the time series. Compare this model to the model you selected in the previous question 3(a) using AIC and BIC. Which is the preferred model?
+
+```{r}
+arim1113 = arima(erie.ts, order = c(1,1,3), method = "ML")
+arima011 = arima(erie.ts, order = c(0,1,1), method = "ML") 
+```
+
+```{r}
+AIC(arim1113)
+AIC(arima011)
+```
+
+```{r}
+BIC(arim1113)
+BIC(arima011)
+```
+
+# 4. Residual Analysis.
+
+(a) Do the residuals of the ARIMA(1,1,3)(0,1,1) model display autocorrelation? Use appropriate plots and/or hypothesis tests to support your answer.
+
+```{r}
+resids.113 = resid(arim1113)
+## Residual Analysis
+par (mfrow=c(2,2))
+plot(resids.113, ylab='Standardized Residuals', main="Residual Plot")
+abline(h=0)
+acf(resids.113,main= 'ACF of the Model Residuals', na.action = na.pass, lag.max = 12*4)
+pacf(resids.113,main='PACF of the Model Residuals', na.action = na.pass, lag.max = 12*4)
+qqnorm(resids.113)
+qqline(resids.113)
+```
+
+
+```{r}
+Box.test(resids.113, lag = (1+1+3), type = "Box-Pierce", fitdf = (1+3))
+Box.test(resids.113, lag = (1+1+3), type = "Ljung-Box", fitdf = (1+3))
+```
+
+
+```{r}
+resids.011 = resid(arima011)
+## Residual Analysis
+par (mfrow=c(2,2))
+plot(resids.011, ylab='Standardized Residuals', main="Residual Plot")
+abline(h=0)
+acf(resids.011,main= 'ACF of the Model Residuals', na.action = na.pass, lag.max = 12*4)
+pacf(resids.011,main='PACF of the Model Residuals', na.action = na.pass, lag.max = 12*4)
+qqnorm(resids.011)
+qqline(resids.011)
+```
+
+```{r}
+Box.test(resids.011, lag = (0+1+1), type = "Box-Pierce", fitdf = (0+1))
+Box.test(resids.011, lag = (0+1+1), type = "Ljung-Box", fitdf = (0+1))
+```
+
+
+
+(b) Do the residuals of the ARIMA(1,1,3)(0,1,1) model follow a normal distribution? Use appropriate plots and/or hypothesis tests to support your answer.
+
+```{r}
+hist(resids.113,xlab='Residuals',main='Histogram: Residuals')
+```
+
+```{r}
+hist(resids.011,xlab='Residuals',main='Histogram: Residuals')
+```
+
+```{r}
+qqnorm(resids.011)
+qqline(resids.011)
+```
+
+```{r}
+qqnorm(resids.113)
+qqline(resids.113)
+```
+
+
+# 5. Model Fit.
+
+(a) Plot the fitted values of the model you selected in question 3(a) alongside the original values. Do the same for the ARIMA(1,1,3)(0,1,1) model. Which model fits better? Use the mean absolute error and the precision measure to evaluate the fit.
+
+```{r}
+## MAE
+mean(abs(fitted(final_model)[1:600]-level))
+## PM
+sum((fitted(final_model)[1:600]-level)^2)/sum((level-mean(level))^2)
+```
+
+```{r}
+## MAE
+mean(abs(fitted(arim1113)[1:600]-level))
+## PM
+sum((fitted(arim1113)[1:600]-level)^2)/sum((level-mean(level))^2)
+```
+
+```{r}
+## MAE
+mean(abs(fitted(arima011)[1:600]-level))
+## PM
+sum((fitted(arima011)[1:600]-level)^2)/sum((level-mean(level))^2)
+```
+
+
+
+
+
+
+

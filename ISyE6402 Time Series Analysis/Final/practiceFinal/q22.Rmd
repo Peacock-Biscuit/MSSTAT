@@ -1,0 +1,147 @@
+---
+title: "PracticeFinal"
+author: "Jim Liu"
+date: "12/5/2020"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+UK FTSE Stock Index Analysis
+In this R data analysis, you will examine daily closing prices for the UK FTSE stock index. You will start by fitting an ARIMA(0,2,2) model to the data. You may load the data, plot the data, and fit the ARIMA model
+
+
+```{r}
+library(TSA)
+library(mgcv)
+library(vars)
+library(tseries)
+library(fGarch)
+library(rugarch)
+```
+
+```{r}
+library(datasets)
+data("EuStockMarkets")
+FTSE = EuStockMarkets[,"FTSE"]
+plot(FTSE)
+plot(diff(FTSE)); acf(diff(FTSE)); pacf(diff(FTSE))
+plot(diff(diff(FTSE))); acf(diff(diff(FTSE))); pacf(diff(diff(FTSE)))
+arima.model = arima(FTSE, c(0,2,2))
+```
+
+1. Residual Analysis.
+
+(a) Let's examine the residuals of the ARIMA(0,2,2) model. Provide the ACF and PACF plots for the residuals, as well as a plot of the residuals themselves. Is there any sign of heteroskedasticity?
+
+```{r}
+residuals = resid(arima.model)
+plot(residuals)
+acf(residuals, lag.max = 20)
+pacf(residuals, lag.max = 20)
+```
+
+(b) Now provide the ACF, PACF, and a plot of the squared residuals. Is there any sign of heteroskedasticity?
+
+```{r}
+plot(residuals^2)
+acf(residuals^2, lag.max = 20)
+pacf(residuals^2, lag.max = 20)
+```
+
+
+
+2. GARCH Modeling.
+
+(a) Select an ARIMA(0,2,2)-GARCH(m,n) model based on BIC. Consider model orders m , n ∈ { 0 , 1 , 2 , 3 }
+
+```{r}
+#GARCH update
+test_modelAGG <- function(m,n){
+  spec = ugarchspec(variance.model=list(garchOrder=c(m,n)),
+                    mean.model=list(armaOrder=c(0, 2,2), 
+                    include.mean=T),distribution.model="std") 
+
+  fit = ugarchfit(spec, FTSE, solver = 'hybrid')
+  current.bic = infocriteria(fit)[2]
+  df = data.frame(m,n,current.bic)
+  names(df) <- c("m","n","BIC")
+  print(paste(m,n,current.bic,sep=" "))
+  return(df)
+}
+
+orders = data.frame(Inf,Inf,Inf)
+names(orders) <- c("m","n","BIC")
+
+for (m in 0:3){
+     for (n in 0:3){
+          possibleError <- tryCatch(
+            orders<-rbind(orders,test_modelAGG(m,n)),
+            error=function(e) e
+          )
+          if(inherits(possibleError, "error")) next
+          }
+}
+orders <- orders[order(-orders$BIC),]
+tail(orders)
+```
+
+
+ARIMA(0,2,2)-GARCH(2,3)
+
+(b) Compare the chosen ARIMA-GARCH model to the ARIMA only model (i.e. the ARIMA(0,2,2)-GARCH(0,0) model). Does the GARCH modeling improve the model fit?
+
+```{r}
+final.model.1 = garchFit(~ arma(0,2, 2)+ garch(2,3), data=FTSE, trace = FALSE)
+summary(final.model.1)
+```
+
+
+```{r}
+model.arima = arima(FTSE, order=c(0,2,2), method="ML")
+model.arima
+```
+
+
+3. Refine Order Selection.
+
+(a) Refine the model order selection, i.e. the choices of p,q,m and n for the ARIMA(p,2,q)-GARCH(m,n) model using an appropriate order selection process.
+
+(b) Write out the full mathematical representation of the selected model using the parameter estimates.
+
+4. Residual Analysis, revisited.
+
+(a) Plot the residuals and the standardized residuals of the ARIMA-GARCH model. How has the GARCH modeling handled the heteroskedasticity?
+
+(b) Do the standardized residuals of the ARIMA-GARCH model display autocorrelation? Use appropriate plots and/or hypothesis tests to support your answer.
+
+(c) Do the squared standardized residuals of the ARIMA-GARCH model display autocorrelation? Use appropriate plots and/or hypothesis tests to support your answer.
+
+(d) Do the standardized residuals of the ARIMA-GARCH model follow a normal distribution? Use appropriate plots and/or hypothesis tests to support your answer.
+
+5. Model Fit.
+
+(a) Use the following code to fit an ARIMA(2,2,2) and an ARIMA(2,2,2)-GARCH(1,1) model to the FTSE data. 
+
+
+```{r}
+library(forecast)
+diffs = diff(diff(FTSE))
+model1 = Arima(diffs, c(2,0,2));
+model2 = garchFit(~ arma(2,2)+ garch(1,1), data = diffs, trace = FALSE)
+```
+
+Plot the twice differenced data. Based on the plot, which model do you expect to fit the data better?
+
+(b) Calculate the mean absolute error (MAE) for the two models. Based on MAE, which model fits better? How do you explain this result? You may use the following commands to get the fitted values:
+
+```{r}
+model1.fitted = fitted(model1)
+model2.fitted = model2@fitted
+```
+
+
