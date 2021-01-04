@@ -1,0 +1,123 @@
+---
+title: "PracticeMidterm"
+author: "Jim Liu"
+date: "10/13/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+```{r}
+data = read.csv("/Users/jim/Dropbox (GaTech)/Courses/ISyE6402/Midterm/HouseData.csv", header=TRUE)
+data.train = data[1:(nrow(data)-4),]
+data.test = data[(nrow(data)-3):nrow(data),]
+data.train
+```
+
+
+Question 1.
+Provide the time series plot of the 'Houses for Sale' data. Which assumptions of stationarity, if any, seem to be violated.
+Provide the time series plot of the 1st order difference of the Houses for Sale data.
+
+```{r Q1 time series}
+HFS = data.train$Houses_for_Sale
+HFS.ts = ts(data=HFS, start=1976, frequency = 4)
+ts.plot(HFS.ts, col='blue')
+```
+
+Constant mean/constant variance
+
+```{r HFS Diff}
+HFS.dif = diff(HFS.ts)
+ts.plot(HFS.dif,main='House of Sale - Differenced',ylab='Sale Difference',col='blue')
+```
+
+
+
+Question 2.
+
+Identify the best ARIMA model to fit the Houses for Sale data according to the AIC criterion. Use regular 1st order differencing and consider up to order 5 for AR and MA terms. Report the AIC and estimated coefficients of your selected model. Which coefficients are significant at the 5% significance level?
+
+Provide plots of the ACF and PACF of the residuals from your ARIMA model and perform the Ljung-Box test. Do the residuals appear uncorrelated?
+
+```{r ARIMA}
+n = length(HFS.ts)
+test_modelA <- function(p,d,q){
+mod = arima(HFS.ts, order=c(p,d,q), method="ML")
+current.aic = AIC(mod)
+df = data.frame(p,d,q,current.aic)
+names(df) <- c("p","d","q","AIC")
+print(paste(p,d,q,current.aic,sep=" "))
+return(df)
+}
+orders = data.frame(Inf,Inf,Inf,Inf)
+names(orders) <- c("p","d","q","AIC")
+
+for (p in 0:5){
+  for (d in 0:1){
+    for (q in 0:5) {
+      possibleError <- tryCatch(
+        orders<-rbind(orders,test_modelA(p,d,q)),
+        error=function(e) e
+      )
+      if(inherits(possibleError, "error")) next
+
+    }
+  }
+}
+```
+
+```{r ARIMA select}
+orders <- orders[order(-orders$AIC),]
+tail(orders)
+```
+
+```{r HOS ARIMA(5, 1, 2)}
+final_HFS = arima(HFS.ts, order = c(5,1,2), method = "ML")
+resids.HFS = resid(final_HFS)
+## Residual Analysis
+par(mfrow=c(2,2))
+plot(resids.HFS, ylab='Standardized Residuals', main="Residual Plot")
+abline(h=0)
+acf(resids.HFS,main= 'ACF of the Model Residuals', lag.max = 52*4)
+pacf(resids.HFS,main='PACF of the Model Residuals', lag.max = 52*4)
+qqnorm(resids.HFS)
+qqline(resids.HFS)
+```
+
+```{r hso Tests}
+## Test for Independence for final model
+Box.test(resids.HFS, lag = (5+1+2), type = "Box-Pierce", fitdf = (5+2))
+Box.test(resids.HFS, lag = (5+1+2), type = "Ljung-Box", fitdf = (5+2))
+```
+
+```{r HSO}
+library(lmtest)
+coeftest(final_HFS)
+```
+
+Question 3.
+
+Plot the forecasts for the 2017 data using the ARIMA model fit in Question 2 alongside the actual observations.
+Using the precision measure, assess the prediction accuracy of the model. 
+
+```{r EU forecasts, echo=FALSE}
+n = length(data$Houses_for_Sale)
+nfit = n-4
+HFS.all=ts(data$Houses_for_Sale, frequency = 4, start = 1976)
+outprice.EU = arima(data$Houses_for_Sale[1:nfit], order = c(5,1,2),method = "ML")
+outpred.EU = predict(outprice.EU,n.ahead=4)
+ubound.EU = outpred.EU$pred+1.96*outpred.EU$se
+lbound.EU = outpred.EU$pred-1.96*outpred.EU$se
+ymin = min(lbound.EU)
+ymax = max(ubound.EU)
+plot(time(HFS.all)[160:168],data$Houses_for_Sale[160:168],type="l", ylim=c(ymin,ymax), xlab="Time", ylab="Rate", main="EU Forecasting")
+points(time(HFS.all)[165:168],outpred.EU$pred,col="red")
+lines(time(HFS.all)[165:168],ubound.EU,lty=3,lwd= 2, col="blue")
+lines(time(HFS.all)[165:168],lbound.EU,lty=3,lwd= 2, col="blue")
+```
+
