@@ -28,6 +28,8 @@ CS 1332 Data Structures and Algorithms - Spring 2020
 
 CS 2110 Computer Organizations and Programming - Summer 2020
 
+CS 2200 An Introduction to Computer Systems and Networks - Spring 2021
+
 CS 4400 Database Systems - Fall 2020
 
 CS 7450 Information Visualization - Fall 2020
