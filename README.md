@@ -8,6 +8,8 @@ Courses Taken at Georgia Tech:
 
 ISyE 6402 Time Series Analysis - Fall 2020
 
+ISyE 6403 Design of Experiments - Fall 2021
+
 ISyE 6412 Theoretical Statistics - Fall 2019
 
 ISyE 6414 Regression Analysis - Fall 2019
@@ -32,6 +34,10 @@ CS 2200 Computer Systems and Networks - Spring 2021
 
 CS 4400 Database Systems - Fall 2020
 
+CS 7210 Distributed Computing - Fall 2021
+
 CS 7450 Information Visualization - Fall 2020
 
 CS 7641 Machine Learning - Summer 2020
+
+CS 8803 Systems for Machine Learning - Fall 2021
