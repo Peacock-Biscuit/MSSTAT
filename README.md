@@ -6,11 +6,9 @@ Courses Taken at Georgia Tech:
 
 ## Statistics Courses
 
-Math 6263 Testing Statistical Hypotheses
+Math 6263 Testing Statistical Hypotheses - Fall 2021
 
 ISyE 6402 Time Series Analysis - Fall 2020
-
-ISyE 6403 Design of Experiments - Fall 2021
 
 ISyE 6412 Theoretical Statistics - Fall 2019
 
