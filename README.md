@@ -34,8 +34,6 @@ CS 2200 Computer Systems and Networks - Spring 2021
 
 CS 4400 Database Systems - Fall 2020
 
-CS 7210 Distributed Computing - Fall 2021
-
 CS 7450 Information Visualization - Fall 2020
 
 CS 7641 Machine Learning - Summer 2020
